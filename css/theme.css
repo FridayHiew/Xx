@@ -1,0 +1,53 @@
+/* ============================================================
+   theme.css - CSS 变量
+   ============================================================ */
+
+:root {
+  /* 背景 */
+  --bg-dark:       #0a0906;
+  --bg-panel:      #14110c;
+  --bg-card:       #1a1610;
+  --bg-dark2:      #060504;
+
+  /* 边框 */
+  --border-main:   #3a3020;
+  --border-soft:   #2a2216;
+  --border-gold:   #6a4a1a;
+  --border-strong: #5a4a2a;
+
+  /* 文字 */
+  --text-main:     #c8b898;
+  --text-dim:      #8a7a5a;
+  --text-gold:     #e8c87a;
+  --text-gold2:    #d8b878;
+  --text-muted:    #6a5a4a;
+  --text-bright:   #f0dca8;
+
+  /* 状态色 */
+  --c-normal:      #b8a888;
+  --c-good:        #7fbf5f;
+  --c-bad:         #d05a4a;
+  --c-gold:        #e8c87a;
+  --c-purple:      #b088d8;
+  --c-blue:        #6aa8d8;
+  --c-pink:        #d888a8;
+
+  /* 气血/灵力 */
+  --hp-from:       #5a1a1a;
+  --hp-to:         #d05a4a;
+  --mp-from:       #1a3a5a;
+  --mp-to:         #6aa8d8;
+
+  /* 时段 */
+  --hour-morning:  #e8c87a;
+  --hour-noon:     #d0a050;
+  --hour-night:    #6aa8d8;
+
+  /* 圆角 */
+  --radius-sm:     4px;
+  --radius-md:     6px;
+  --radius-lg:     8px;
+
+  /* 阴影 */
+  --shadow-gold:   0 0 40px rgba(232, 200, 122, 0.15);
+}

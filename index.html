@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Test</title>
+<link rel="stylesheet" href="css/reset.css">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+<div id="app">
+  <div class="top-bar">
+    <div class="icon-btn log-icon" id="logIcon" onclick="openLog()" title="日志">📜
+      <span class="badge" id="logBadge">0</span>
+    </div>
+    <h1>修 仙 人 生</h1>
+    <div class="icon-btn" id="profileIcon" onclick="openProfile()" title="角色">?</div>
+  </div>
+
+  <div id="creationPanel" class="panel">
+    <h3>开辟道途</h3>
+    <p>道号：<input id="nameInput" value="无名" maxlength="8"></p>
+    <p>性别：
+      <select id="genderInput">
+        <option value="男">男</option>
+        <option value="女">女</option>
+      </select>
+    </p>
+    <p>生辰：<select id="monthInput"></select> <select id="dayInput"></select></p>
+    <p class="small">生辰将影响你的命格、性格与运气。灵根、宗门将在入门后揭示。</p>
+    <div style="margin-top:8px;">
+      <button class="primary block" onclick="createCharacter()">开始修仙</button>
+    </div>
+  </div>
+
+  <div id="gameArea" style="display:none;">
+    <div class="status-bar" id="statusBar"></div>
+    <div class="tabs" id="tabs"></div>
+    <div class="panel" id="panelContent"></div>
+  </div>
+</div>
+
+<div class="modal-mask" id="modalMask"><div class="modal" id="modalBox"></div></div>
+<div class="modal-mask" id="profileMask"><div class="profile-modal" id="profileBox"></div></div>
+<div class="modal-mask" id="logMask"><div class="log-modal" id="logBox"></div></div>
+
+<!-- ========== 数据层 ========== -->
+<script src="js/data/constants.js"></script>
+<script src="js/data/realms.js"></script>
+<script src="js/data/sects.js"></script>
+<script src="js/data/heart-arts.js"></script>
+<script src="js/data/skills.js"></script>
+<script src="js/data/chores.js"></script>
+<script src="js/data/hobbies.js"></script>
+<script src="js/data/recipes.js"></script>
+<script src="js/data/dialogues.js"></script>
+
+<!-- ========== 核心层 ========== -->
+<script src="js/core/state.js"></script>
+<script src="js/core/utils.js"></script>
+<script src="js/core/date.js"></script>
+<script src="js/core/log.js"></script>
+<script src="js/core/modal.js"></script>
+<script src="js/core/save.js"></script>
+
+<!-- ========== 系统层 ========== -->
+<script src="js/systems/npc.js"></script>
+<script src="js/systems/character.js"></script>
+<script src="js/systems/heart-arts.js"></script>
+<script src="js/systems/cultivate.js"></script>
+<script src="js/systems/chores.js"></script>
+<script src="js/systems/social.js"></script>
+<script src="js/systems/sect.js"></script>
+<script src="js/systems/fight.js"></script>
+<script src="js/systems/story.js"></script>
+<script src="js/systems/ending.js"></script>
+
+<!-- ========== UI 层 ========== -->
+<script src="js/ui/status.js"></script>
+<script src="js/ui/day.js"></script>
+<script src="js/ui/cultivate.js"></script>
+<script src="js/ui/social.js"></script>
+<script src="js/ui/sect.js"></script>
+<script src="js/ui/profile.js"></script>
+<script src="js/ui/fight.js"></script>
+<script src="js/ui/render.js"></script>
+
+<!-- ========== 启动 ========== -->
+<script src="js/main.js"></script>
+</body>
+</html>

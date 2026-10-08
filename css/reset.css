@@ -1,0 +1,35 @@
+/* ============================================================
+   reset.css - 基础重置
+   ============================================================ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body { height: 100%; }
+
+body {
+  background: var(--bg-dark);
+  color: var(--text-main);
+  font-family: "KaiTi", "STKaiti", "楷体", serif;
+  padding: 6px;
+  line-height: 1.55;
+  font-size: 15px;
+  -webkit-text-size-adjust: 100%;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input, select, textarea {
+  font-family: inherit;
+}
+
+ul, ol { list-style: none; }
+
+a { color: inherit; text-decoration: none; }

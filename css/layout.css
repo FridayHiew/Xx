@@ -1,0 +1,243 @@
+/* ============================================================
+   layout.css - 布局
+   ============================================================ */
+
+#app {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* ========== 顶栏 ========== */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  gap: 6px;
+}
+
+.top-bar h1 {
+  letter-spacing: 4px;
+  font-size: 17px;
+  flex: 1;
+  text-align: center;
+  color: var(--text-gold);
+}
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #3a2e1c, #1a1610);
+  border: 2px solid var(--border-gold);
+  color: var(--text-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(232, 200, 122, 0.3);
+  flex-shrink: 0;
+}
+
+.icon-btn:active {
+  transform: scale(0.95);
+}
+
+.icon-btn.log-icon {
+  position: relative;
+}
+
+.icon-btn.log-icon .badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--c-bad);
+  color: #fff;
+  font-size: 10px;
+  border-radius: 8px;
+  padding: 0 5px;
+  min-width: 16px;
+  text-align: center;
+  display: none;
+}
+
+.icon-btn.log-icon.has-new .badge {
+  display: block;
+}
+
+/* ========== 状态栏 ========== */
+.status-bar {
+  background: linear-gradient(180deg, var(--bg-card), var(--bg-panel));
+  border: 1px solid var(--border-main);
+  border-radius: var(--radius-md);
+  padding: 6px 8px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 3px 8px;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.status-bar > span {
+  display: flex;
+  justify-content: space-between;
+}
+
+.status-bar b {
+  color: var(--text-gold);
+}
+
+.bar-row {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.bar-row .label {
+  width: 60px;
+  color: var(--text-dim);
+}
+
+.bar-wrap {
+  flex: 1;
+  height: 10px;
+  background: #221c12;
+  border: 1px solid var(--border-main);
+  border-radius: 5px;
+  overflow: hidden;
+  position: relative;
+}
+
+.bar-fill {
+  height: 100%;
+  transition: width 0.3s;
+}
+
+.bar-hp {
+  background: linear-gradient(90deg, var(--hp-from), var(--hp-to));
+}
+
+.bar-mp {
+  background: linear-gradient(90deg, var(--mp-from), var(--mp-to));
+}
+
+.bar-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 9px;
+  color: #fff;
+  line-height: 10px;
+  text-shadow: 0 0 3px #000;
+}
+
+/* ========== Tab ========== */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-bottom: 6px;
+}
+
+.tab {
+  flex: 1 1 auto;
+  padding: 8px 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-main);
+  color: #a89878;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  text-align: center;
+  min-width: 60px;
+}
+
+.tab.active {
+  background: #2a2216;
+  color: var(--text-gold);
+  border-color: var(--border-gold);
+}
+
+.tab.locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ========== 面板 ========== */
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-main);
+  border-radius: var(--radius-md);
+  padding: 10px;
+  margin-bottom: 6px;
+}
+
+.panel h3 {
+  color: var(--text-gold);
+  font-size: 14px;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--border-soft);
+  padding-bottom: 3px;
+}
+
+.panel h4 {
+  color: var(--text-gold2);
+  font-size: 13px;
+  margin: 6px 0 3px;
+}
+
+.panel h5 {
+  font-size: 12px;
+}
+
+/* ========== 时段标签 ========== */
+.hour-label {
+  font-size: 12px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-left: 6px;
+}
+
+.hour-label.h-morning {
+  background: #3a2e1a;
+  color: var(--hour-morning);
+}
+
+.hour-label.h-noon {
+  background: #3a2a1a;
+  color: var(--hour-noon);
+}
+
+.hour-label.h-night {
+  background: #1a2a3a;
+  color: var(--hour-night);
+}
+
+/* ========== 响应式 ========== */
+@media (max-width: 700px) {
+  .status-bar {
+    font-size: 11px;
+    padding: 5px 6px;
+  }
+  .tab {
+    font-size: 12px;
+    padding: 7px 4px;
+    min-width: 56px;
+  }
+  .top-bar h1 {
+    font-size: 15px;
+    letter-spacing: 2px;
+  }
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+}

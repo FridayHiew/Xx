@@ -19,9 +19,10 @@ function pickDialogue(npc) {
   return pick(candidates).text;
 }
 
-/* 周日事件 */
+/* 周日事件（用星期） */
 function checkSundayEvent() {
-  if (S.day - S.flags.lastSundayDay < 7) return;
+  if (S.weekday !== 0) return;
+  if (S.flags.lastSundayDay === S.day) return;
   S.flags.lastSundayDay = S.day;
 
   const stage = getStoryStage();
@@ -122,21 +123,20 @@ function checkSecretRealm() {
 }
 
 /* 进入秘境 */
-
 function enterSecretRealm() {
   showModal("秘境 · 第 1 层", `
     <p>你踏入秘境。</p>
     <p>迷雾森林中，前方隐约有身影。</p>
-    <p>当前气血：${Math.floor(S.hp)}/${S.hpMax}</p>
-    <p>当前灵力：${Math.floor(S.mp)}/${S.mpMax}</p>
+    <p>当前气血：${Math.floor(S.hp)}/${totalMaxHp()}</p>
+    <p>当前灵力：${Math.floor(S.mp)}/${totalMaxMp()}</p>
   `, [
     { label: "深入", fn: () => {
         closeModal();
         const events = SECRET_EVENTS.layer1;
         const ev = pick(events);
         if (ev.type === "fight") {
-          const enemy = FIGHT_ENEMIES[ev.enemy][0];
-          startFight(enemy);
+          const enemy = pick(FIGHT_ENEMIES[ev.enemy]);
+          startBattle([{ enemyId: enemy.id }]);
         } else if (ev.type === "choice") {
           showModal("秘境事件", `
             <p>${ev.text}</p>
@@ -145,11 +145,14 @@ function enterSecretRealm() {
             fn: () => {
               closeModal();
               if (o.effect.mat) {
-                for (const k in o.effect.mat) S.mat[k] = (S.mat[k] || 0) + o.effect.mat[k];
+                for (const k in o.effect.mat) addItem(k, o.effect.mat[k]);
                 log(`获得 ${Object.entries(o.effect.mat).map(([k, v]) => `${k}×${v}`).join("、")}`, "c-good");
               }
               if (o.effect.dao) S.dao = (S.dao || 0) + o.effect.dao;
-              if (o.effect.fight) startFight(FIGHT_ENEMIES[o.effect.fight][0]);
+              if (o.effect.fight) {
+                const enemy = pick(FIGHT_ENEMIES[o.effect.fight]);
+                startBattle([{ enemyId: enemy.id }]);
+              }
               /* 10% 概率掉残卷 */
               if (chance(0.10)) {
                 const frag = getRandomFragment();

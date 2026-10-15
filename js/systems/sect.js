@@ -28,26 +28,27 @@ function sectTabLocked(tab) {
 /* 杂役铺刷新 */
 function refreshShop() {
   currentShopDay = S.day;
-  const allIds = SHOP_ITEMS.map(x => x.id);
+  const allIds = getItemsByType("other").filter(id => ITEMS[id].cat);
   currentShopStock = [...allIds].sort(() => Math.random() - 0.5).slice(0, SHOP_SIZE);
 }
 
 function refreshShopPaid() {
   const cost = SHOP_REFRESH_COST;
   if (!spendCurrency(cost)) { log(`${currencyName()}不足（需 ${cost}）。`, "c-bad"); return; }
-  const allIds = SHOP_ITEMS.map(x => x.id);
+  const allIds = getItemsByType("other").filter(id => ITEMS[id].cat);
   currentShopStock = [...allIds].sort(() => Math.random() - 0.5).slice(0, SHOP_SIZE);
   log(`你花了 ${cost} ${currencyName()} 刷新了杂役铺。`, "c-normal");
   save(); render();
 }
 
 function buyShopItem(id) {
-  const it = SHOP_ITEMS.find(x => x.id === id);
+  const it = ITEMS[id];
   if (!it) return;
-  if (S.tools[it.id]) { log("已购买过。", "c-bad"); return; }
+  if (S.tools[id]) { log("已购买过。", "c-bad"); return; }
   if (!spendCurrency(it.price)) { log(`${currencyName()}不足。`, "c-bad"); return; }
 
-  S.tools[it.id] = true;
+  S.tools[id] = true;
+
   if (it.hobby) {
     if (S.hobbies.length >= 3) { log("爱好已满 3 个。", "c-bad"); addCurrency(it.price); return; }
     if (!S.hobbies.includes(it.hobby)) {
@@ -90,34 +91,28 @@ function showRankHelp() {
   `, [{ label: "关闭", fn: closeModal }]);
 }
 
-/* ========== 发放晋升奖励（独立函数，放在 tryPromote 之前） ========== */
+/* ========== 发放晋升奖励 ========== */
+
 function givePromotionRewards(rank) {
   const rewards = PROMOTION_REWARDS[rank];
   if (!rewards) return;
 
-  const detail = [`身份：${rank}`];
+  const detail = [];
 
-  /* 心法 */
+  /* 心法 → 给"上卷" */
   if (rewards.art) {
-    if (!S.heartArts.learned.includes(rewards.art)) {
-      const art = HEART_ARTS.find(a => a.id === rewards.art);
-      S.heartArts.learned.push(rewards.art);
-      S.heartArts.progress[rewards.art] = {
-        lvl: 0,
-        exp: 0,
-        proficiency: 0,
-        maxLearn: art.baseLearn || 3,
-      };
-      S.heartArts.current = rewards.art;
-      log(`【晋升奖励】获得心法《${art.name}》。`, "c-gold");
-      detail.push(`获得心法：《${art.name}》`);
+    addItem(rewards.art + "_f1", 1);
+    const art = HEART_ARTS.find(a => a.id === rewards.art);
+    if (art) {
+      log(`【晋升奖励】获得《${art.name}·上卷》。`, "c-gold");
+      detail.push(`获得：《${art.name}·上卷》`);
     }
   }
 
   /* 武器 */
   if (rewards.weapon) {
-    S.equips[rewards.weapon] = true;
-    const eq = EQUIPS.find(e => e.id === rewards.weapon);
+    addItem(rewards.weapon, 1);
+    const eq = ITEMS[rewards.weapon];
     if (eq) {
       log(`【晋升奖励】获得 ${eq.name}。`, "c-gold");
       detail.push(`获得武器：${eq.name}`);
@@ -126,12 +121,23 @@ function givePromotionRewards(rank) {
 
   /* 衣服 */
   if (rewards.armor) {
-    S.equips[rewards.armor] = true;
-    const eq = EQUIPS.find(e => e.id === rewards.armor);
+    addItem(rewards.armor, 1);
+    const eq = ITEMS[rewards.armor];
     if (eq) {
       log(`【晋升奖励】获得 ${eq.name}。`, "c-gold");
       detail.push(`获得道袍：${eq.name}`);
     }
+  }
+
+  /* 残卷 */
+  if (rewards.fragments && rewards.fragments.length > 0) {
+    rewards.fragments.forEach(fragId => {
+      addFragment(fragId, 1);
+      const found = getFragmentById(fragId);
+      if (found) {
+        detail.push(`获得残卷：${found.fragment.name}`);
+      }
+    });
   }
 
   if (typeof updateElementLvl === "function") updateElementLvl();
@@ -139,11 +145,12 @@ function givePromotionRewards(rank) {
   showModal("晋升奖励", `
     <p>你获得了宗门的赏赐：</p>
     <div class="detail-list">
-      ${detail.slice(1).map(d => `<div>${d}</div>`).join("")}
+      ${detail.map(d => `<div>${d}</div>`).join("")}
     </div>
     <p class="small">可在【角色>背包>装备】中装配。</p>
   `, [{ label: "多谢宗门", fn: closeModal }]);
 }
+
 
 /* ========== 尝试晋升 ========== */
 function tryPromote() {
@@ -161,7 +168,6 @@ function tryPromote() {
   }
 
   if (Math.random() < successRate) {
-    /* 成功 */
     if (req.contrib) S.contrib -= req.contrib;
 
     if (nextRank === "门外") {
@@ -231,7 +237,7 @@ function choosePeak(peakId) {
 function exchange(item, cost) {
   if (S.contrib < cost) { log("贡献不足。", "c-bad"); return; }
   S.contrib -= cost;
-  S.items[item] = (S.items[item] || 0) + 1;
+  addItem(item, 1);
   log(`你用贡献兑换了 ${item}。`, "c-gold");
   save(); render();
 }
@@ -240,7 +246,8 @@ function exchange(item, cost) {
 function exchangeFragment(fragId, cost) {
   if (S.contrib < cost) { log("贡献不足。", "c-bad"); return; }
   S.contrib -= cost;
-  addFragment(fragId, 1);
+  addItem(fragId, 1);
+  log(`你兑换了 1 个残卷。`, "c-gold");
   save(); render();
 }
 
@@ -252,4 +259,54 @@ function upgradeCave(key, price) {
   S.cave[key]++;
   log(`升级洞府：${key} Lv.${S.cave[key]}。`, "c-gold");
   save(); render();
+}
+
+/* ========== 兑换法术秘籍 ========== */
+function exchangeSpellBook(bookId, cost) {
+  const book = ITEMS[bookId];
+  if (!book || book.type !== "spellbook") return;
+  if (S.contrib < cost) { log("贡献不足。", "c-bad"); return; }
+
+  if (hasSpell(book.spellId)) { log("已学会该法术。", "c-bad"); return; }
+
+  S.contrib -= cost;
+  addItem(bookId, 1);
+  log(`你兑换了【${book.name}】，可在背包中参悟。`, "c-gold");
+  save(); render();
+}
+
+/* ========== 兑换召唤秘籍 ========== */
+function exchangeSummonBook(bookId, cost) {
+  const book = ITEMS[bookId];
+  if (!book || book.type !== "summonbook") return;
+  if (S.contrib < cost) { log("贡献不足。", "c-bad"); return; }
+
+  if (S.combatSkills && S.combatSkills.learned.includes(book.summonId)) {
+    log("已学会该召唤。", "c-bad"); return;
+  }
+
+  S.contrib -= cost;
+  addItem(bookId, 1);
+  log(`你兑换了【${book.name}】，可在背包中参悟。`, "c-gold");
+  save(); render();
+}
+
+/* ========== 购买装备 ========== */
+function buyShopEquip(id, price) {
+  if (S.contrib < price) { log("贡献不足。", "c-bad"); return; }
+
+  const eq = ITEMS[id];
+  if (!eq) { log("装备不存在。", "c-bad"); return; }
+
+  if (hasItem(id)) { log("已拥有该装备。", "c-bad"); return; }
+
+  S.contrib -= price;
+  addItem(id, 1);
+
+  log(`你购买了【${eq.name}】。`, "c-gold");
+  save(); render();
+  showActionModal("购买成功", [
+    `获得：${eq.name}`,
+    `可在【角色>装配】中装配`,
+  ]);
 }

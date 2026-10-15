@@ -138,8 +138,7 @@ function doDuel() {
   }
 
   const html = list.map(n => {
-    const realmText = n.realm === 0 ? "凡人" : `炼气·${n.sub}重`;
-    return `<div class="card">
+  const realmText = n.realm === 0 ? "凡人" : `${REALMS[n.realm].name}·${n.sub}重`;    return `<div class="card">
       <b>${n.name}</b> <span class="tag">${n.role}</span>
       <div class="small">${realmText}　${n.tier}</div>
       <button onclick="startDuel('${n.id}')">选择对练</button>

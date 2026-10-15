@@ -9,13 +9,10 @@ function createCharacter() {
   const day = parseInt(document.getElementById("dayInput").value) || 1;
 
   const ie = ((month + day) % 2 === 0) ? "E" : "I";
-  const luck = 3 + ((month * day) % 7);
-
+  const luck = rndInt(0, 9);
   const skillTalent = SKILL_TALENTS[(month + day) % SKILL_TALENTS.length];
 
-  const seed1 = (month * 31 + day * 7) % 100;
-  const seed2 = (month * 13 + day * 17) % 100;
-  const talent = { zheng: seed1, xie: seed2 };
+  const morality = rndInt(45, 60);
 
   const aptSeed = (month * 31 + day * 7 + luck) % 100;
   let apt;
@@ -40,9 +37,9 @@ function createCharacter() {
     realm: 0, sub: 0, exp: 0,
     hp: 60, hpMax: 60,
     mp: 0, mpMax: 0,
-    atk: 5, def: 3,
+    atk: 5, def: 3, speed: 10,
     luck,
-    talent,
+    morality,
     skillTalent,
 
     heartArts: {
@@ -52,27 +49,62 @@ function createCharacter() {
     },
 
     elementLvl: { jin: 0, mu: 0, shui: 0, huo: 0, tu: 0, lei: 0, bing: 0 },
-    fragments: {},
     dao: 0,
+
+    spells: {
+      learned: [],
+    },
+    combatSkills: {
+      learned: [],
+    },
+
+    statuses: [],
+    resistances: {
+      poison: 0, burn: 0, bleed: 0,
+      stun: 0, freeze: 0, silence: 0, atkDown: 0,
+    },
 
     skills: SKILLS.reduce((o, k) => { o[k] = { lvl: 0, exp: 0 }; return o; }, {}),
     choreSkill: {},
     hobbies,
     hobbySkill: hobbies.reduce((o, h) => { o[h] = 0; return o; }, {}),
     mood: 0,
-    life: 12, lifeMax: REALMS[0].life,
+    life: 12, lifeMax: rnd(12.5, 80),
     day: 1, hour: 0, actionsUsed: 0,
+    weekday: 3,
     money: 300,
     stone: 0,
     contrib: 0,
-    mat: {}, items: {},
-    equips: {}, equipped: { weapon: null, armor: null, ring: null },
+
+    inventory: {},
+    equipped: {
+      head: null, rightHand: null, leftHand: null, body: null, shoes: null,
+      accessory1: null, accessory2: null,
+      artifact1: null, artifact2: null, artifact3: null,
+      pet: null, mount: null, heavenDefying: null,
+    },
     tools: {},
+
     arts: [], arts2: [],
     learnedArts: {},
     npcs: [], npcMap: {},
     metNpcs: {},
     lovers: [],
+
+    pets: {
+      list: [],
+      nextUid: 1,
+    },
+
+    /* 逆天宝物 */
+    heavenDefying: {
+      owned: {},
+      stages: {},
+      killStacks: 0,
+      reviveCooldown: 0,
+      liquid: 0,
+    },
+
     flags: {
       rank: "杂务",
       rootRevealed: false,
@@ -102,8 +134,8 @@ function createCharacter() {
     meditateCount: 1,
   };
 
-  S.items["灵石"] = 10;
-  S.equips["e_armor1"] = true;
+  S.inventory["灵石"] = 10;
+  S.inventory["e_armor1"] = 1;
 
   document.getElementById("creationPanel").style.display = "none";
   document.getElementById("gameArea").style.display = "block";
@@ -111,7 +143,7 @@ function createCharacter() {
   const dateInfo = getDateInfo();
   log(`【${name}】，${gender}，生于${LUNAR_MONTHS[month-1]}${day}日。`, "c-gold");
   log(`当前：逍遥 ${dateInfo.year} 年 · ${dateInfo.monthName}${dateInfo.day}日`, "c-blue");
-  log(`悟性：正 ${talent.zheng} / 邪 ${talent.xie}`, "c-blue");
+  log(`本心：${moralityLabel(morality)}（${morality}）`, "c-blue");
   log(`爱好：${hobbies.join("、")}`, "c-purple");
 
   updateProfileIcon();
@@ -138,14 +170,28 @@ function revealRoot() {
   `, [{ label: "拜入仙门", fn: () => { closeModal(); assignSect(); } }]);
 }
 
+//debug 用 - 开局选宗门
 function assignSect() {
-  const mx = maxRoot(S.roots);
-  const candidates = SECTS.filter(s => s.accept.includes("*") || s.accept.includes(mx.key));
-  if (candidates.length === 0) candidates.push(...SECTS);
-  const sect = pick(candidates);
+  const body = `
+    <p>修士掐指一算，带你来到一处山门前。</p>
+    <p class="small">「选一个你想拜入的宗门吧。」</p>
+  `;
+
+  const actions = SECTS.map(sect => ({
+    label: `${sect.name}（${sect.camp}·${sect.specialty}）`,
+    fn: () => { closeModal(); confirmSect(sect.id); },
+  }));
+
+  actions.push({ label: "取消", fn: closeModal });
+
+  showModal("选择宗门", body, actions);
+}
+
+function confirmSect(sectId) {
+  const sect = SECTS.find(s => s.id === sectId);
+  if (!sect) return;
 
   const body = `
-    <p>修士掐指一算，带你来到一处山门。</p>
     <div class="card">
       <b>${sect.name}</b>
       <span class="tag ${sect.camp === "正道" ? "good" : sect.camp === "邪道" ? "bad" : "gold"}">${sect.camp}</span>
@@ -153,9 +199,12 @@ function assignSect() {
       <div class="small">特色：${sect.specialty}　心法：${sect.art}</div>
       <div class="small">${sect.desc}</div>
     </div>
+    <p class="small">确认拜入？</p>
   `;
-  showModal("宗门安排", body, [
-    { label: "拜入", fn: () => { closeModal(); joinSect(sect.id); } }
+
+  showModal("拜入宗门", body, [
+    { label: "确认", fn: () => { closeModal(); joinSect(sectId); } },
+    { label: "返回", fn: () => { closeModal(); assignSect(); } },
   ]);
 }
 
@@ -186,11 +235,16 @@ function introRitual() {
   const sameTime = candidates.slice(0, 3);
   sameTime.forEach(n => { S.metNpcs[n.id] = true; });
 
+  /* 给开局心法 + 召唤技能 */
+  giveStartingArt();
+  giveStartingSummonSkill();
+  const startArt = getCurrentArt();
+
   const body = `
     <p>一位执事模样的修士迎了上来，扔给你一套粗布制服。</p>
     <p class="small">「穿上吧，这是${sect.name}杂务弟子的制服。」</p>
-    <p>他拍了拍你的肩：</p>
-    <p class="small">「心法残卷，靠你自己去寻。宗门藏经阁、秘境、山野……都有可能。」</p>
+    <p>他又递来一本泛黄的小册子。</p>
+    <p class="small">「这是本门基础心法《${startArt.name}》，闲时可参悟。后续残卷，靠你自己去寻。」</p>
     <hr style="border-color:#2a2216;margin:8px 0;">
     <p>执事环顾四周，指了指旁边同样稚嫩的几人：</p>
     <p class="small">「这几个也是今日入门的，和你一样是杂务弟子。」</p>
@@ -202,7 +256,7 @@ function introRitual() {
     { label: "明白了", fn: () => {
         closeModal();
         S.flags.introDone = true;
-        log(`【入门】你穿上了${sect.name}的制服。`, "c-gold");
+        log(`【入门】你穿上了${sect.name}的制服，获得心法《${startArt.name}》。`, "c-gold");
         if (sameTime.length > 0) {
           log(`【同期】你结识了 ${sameTime.map(n => n.name).join("、")}。`, "c-blue");
         }
@@ -210,4 +264,31 @@ function introRitual() {
         setTimeout(() => morningPrompt(), 300);
       } }
   ]);
+}
+
+function giveStartingSummonSkill() {
+  const skill = getSectSummonSkill(S.sect);
+  if (skill) {
+    if (!S.combatSkills) S.combatSkills = { learned: [] };
+    if (!S.combatSkills.learned.includes(skill.id)) {
+      S.combatSkills.learned.push(skill.id);
+    }
+  }
+}
+
+/* 开局赠送基础心法 */
+function giveStartingArt() {
+  const artId = "lianqi_basic";
+  const art = HEART_ARTS.find(a => a.id === artId);
+
+  S.heartArts.learned.push(artId);
+  S.heartArts.current = artId;
+  S.heartArts.progress[artId] = {
+    lvl: 0,
+    exp: 0,
+    proficiency: 0,
+    maxLearn: 3,
+  };
+
+  updateElementLvl();
 }

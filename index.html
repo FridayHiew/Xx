@@ -42,20 +42,32 @@
   </div>
 </div>
 
+<div id="battleScreen" class="battle-screen"></div>
+<div id="battleSubmenu" class="battle-submenu"></div>
 <div class="modal-mask" id="modalMask"><div class="modal" id="modalBox"></div></div>
 <div class="modal-mask" id="profileMask"><div class="profile-modal" id="profileBox"></div></div>
 <div class="modal-mask" id="logMask"><div class="log-modal" id="logBox"></div></div>
 
 <!-- ========== 数据层 ========== -->
 <script src="js/data/constants.js"></script>
+<script src="js/data/items.js"></script>
+<script src="js/data/shops.js"></script>
+<script src="js/data/heaven-defying.js"></script>
 <script src="js/data/realms.js"></script>
 <script src="js/data/sects.js"></script>
 <script src="js/data/heart-arts.js"></script>
+<script src="js/data/spells.js"></script>
 <script src="js/data/skills.js"></script>
 <script src="js/data/chores.js"></script>
 <script src="js/data/hobbies.js"></script>
 <script src="js/data/recipes.js"></script>
 <script src="js/data/dialogues.js"></script>
+<script src="js/data/formulas.js"></script>
+<script src="js/data/combat-skills.js"></script>
+<script src="js/data/fight-enemies.js"></script>
+<script src="js/data/resistances.js"></script>
+<script src="js/data/status-effects.js"></script>
+<script src="js/data/pets.js"></script>
 
 <!-- ========== 核心层 ========== -->
 <script src="js/core/state.js"></script>
@@ -69,13 +81,20 @@
 <script src="js/systems/npc.js"></script>
 <script src="js/systems/character.js"></script>
 <script src="js/systems/heart-arts.js"></script>
+<script src="js/systems/spells.js"></script>
 <script src="js/systems/cultivate.js"></script>
+<script src="js/systems/alchemy.js"></script>
+<script src="js/systems/heaven-defying.js"></script>
 <script src="js/systems/chores.js"></script>
 <script src="js/systems/social.js"></script>
 <script src="js/systems/sect.js"></script>
-<script src="js/systems/fight.js"></script>
 <script src="js/systems/story.js"></script>
 <script src="js/systems/ending.js"></script>
+<script src="js/systems/fight.js"></script> 
+<script src="js/systems/battle.js"></script>
+<script src="js/systems/status.js"></script>
+<script src="js/systems/pets.js"></script>
+
 
 <!-- ========== UI 层 ========== -->
 <script src="js/ui/status.js"></script>
@@ -84,8 +103,10 @@
 <script src="js/ui/social.js"></script>
 <script src="js/ui/sect.js"></script>
 <script src="js/ui/profile.js"></script>
-<script src="js/ui/fight.js"></script>
 <script src="js/ui/render.js"></script>
+<script src="js/ui/battle.js"></script>
+<script src="js/ui/cave.js"></script>
+
 
 <!-- ========== 启动 ========== -->
 <script src="js/main.js"></script>

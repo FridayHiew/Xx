@@ -8,7 +8,7 @@ function gainChoreSkill(chore, amount = 1) {
   let inc = rnd(0.5, 1.0) * amount;
 
   for (const tid in S.tools) {
-    const tool = SHOP_ITEMS.find(x => x.id === tid);
+    const tool = ITEMS[tid];
     if (tool && tool.chore === chore.id) inc += 0.5 * amount;
   }
 
@@ -123,7 +123,6 @@ function morningPrompt() {
   const chores = rank === "杂务" ? CHORES_FAN : rank === "门外" ? CHORES_MENWAI : CHORES_MENNEI;
   const chore = pick(chores);
 
-  /* 门内以上用"训练灵兽"等；这里根据身份发任务者 */
   let giver;
   if (rank === "杂务") {
     giver = S.npcs.find(n => n.role === "执事" && n.alive);
@@ -184,7 +183,6 @@ function nightPrompt() {
   showModal("食堂晚餐", body, actions);
 }
 
-
 function eatDinner(free) {
   const cost = 50;
   if (!free) {
@@ -198,7 +196,6 @@ function eatDinner(free) {
   S.mood = Math.min(2, S.mood + 1);
   S.flags.hungerStreak = 0;
 
-  /* 恢复气血/灵力各 10% */
   const hpGain = Math.floor(totalMaxHp() * 0.1);
   const mpGain = Math.floor(totalMaxMp() * 0.1);
   S.hp = Math.min(totalMaxHp(), S.hp + hpGain);
@@ -229,7 +226,6 @@ function eatDinner(free) {
     setTimeout(() => hobbyPrompt(), 300);
   });
 }
-
 
 function skipDinner() {
   S.mood = Math.max(-2, S.mood - 1);
@@ -306,7 +302,6 @@ function checkFestival() {
   const contribBonus = Math.floor(S.contrib * 0.1 * rnd(0.5, 1.5));
   const amount = base + rankBonus + contribBonus;
 
-  /* 杂务发铜钱，其他发灵石 */
   if (rank === "杂务") {
     S.money += amount;
     log(`【节日·${fest.name}】宗门派发 ${amount} 铜钱！`, "c-gold");

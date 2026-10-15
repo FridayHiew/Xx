@@ -14,28 +14,22 @@ function switchHeartArt(artId) {
   save(); renderProfile(); render();
 }
 
-/* 兑换心法 —— 宗门已不卖本体，此函数保留但不建议使用 */
+/* 兑换心法（给"上卷"，不直接学） */
 function exchangeArt(artId, cost) {
   if (S.contrib < cost) { log("贡献不足。", "c-bad"); return; }
   const check = canLearnArt(artId);
   if (!check.ok) { log(`无法学习：${check.reason}`, "c-bad"); return; }
 
   S.contrib -= cost;
-  S.heartArts.learned.push(artId);
-  const art = HEART_ARTS.find(a => a.id === artId);
-  S.heartArts.progress[artId] = {
-    lvl: 0,
-    exp: 0,
-    proficiency: 0,
-    maxLearn: 1,
-  };
+  addItem(artId + "_f1", 1);
 
-  updateElementLvl();
-  log(`【兑换】你学会了心法《${art.name}》！`, "c-gold");
+  const art = HEART_ARTS.find(a => a.id === artId);
+  log(`【兑换】获得《${art.name}·上卷》，可在背包中参悟。`, "c-gold");
   save(); render();
+
   showActionModal("兑换成功", [
-    `学会心法：${art.name}`,
-    `可在【角色>心法】切换使用`,
+    `获得：《${art.name}·上卷》`,
+    `可在【背包>秘籍】中参悟`,
   ]);
 }
 
@@ -46,15 +40,13 @@ function exchangeArt(artId, cost) {
 
 /* 玩家是否有某个残卷 */
 function hasFragment(fragId) {
-  return S.fragments && S.fragments[fragId] > 0;
+  return S.inventory && S.inventory[fragId] > 0;
 }
 
 /* 玩家获得残卷 */
 function addFragment(fragId, count) {
   count = count || 1;
-  if (!S.fragments) S.fragments = {};
-  S.fragments[fragId] = (S.fragments[fragId] || 0) + count;
-
+  addItem(fragId, count);
   const found = getFragmentById(fragId);
   if (found) {
     log(`【获得残卷】${found.fragment.name} ×${count}`, "c-gold");
@@ -62,13 +54,7 @@ function addFragment(fragId, count) {
   save();
 }
 
-/* 使用残卷
-   规则：
-   1. 未学本体时，只有 start === 1 的残卷能入门
-   2. 已学本体时，必须 start === maxLearn + 1 才能接续
-   3. B 规则：必须 lvl === maxLearn（当前段圆满）才能用下一卷
-   4. 已达该残卷上限则无需使用
-*/
+/* 使用残卷 */
 function useFragment(fragId) {
   if (!hasFragment(fragId)) {
     log("你没有此残卷。", "c-bad");
@@ -90,7 +76,6 @@ function useFragment(fragId) {
       return;
     }
 
-    /* 自动入门 */
     S.heartArts.learned.push(art.id);
     S.heartArts.progress[art.id] = {
       lvl: 0,
@@ -100,9 +85,12 @@ function useFragment(fragId) {
     };
     if (!S.heartArts.current) S.heartArts.current = art.id;
 
-    /* 消耗残卷 */
-    S.fragments[fragId]--;
-    if (S.fragments[fragId] <= 0) delete S.fragments[fragId];
+    /* 本心变化 */
+    const delta = rndInt(1, 3);
+    if (art.type === "正") S.morality = Math.min(100, S.morality + delta);
+    else if (art.type === "邪") S.morality = Math.max(0, S.morality - delta);
+
+    removeItem(fragId, 1);
 
     updateElementLvl();
 
@@ -112,34 +100,30 @@ function useFragment(fragId) {
       `使用：${fragment.name}`,
       `学会心法：《${art.name}》`,
       `可修炼至 Lv.${fragment.end}`,
-    ]);
+      art.type === "正" ? `本心 +${delta}` : art.type === "邪" ? `本心 -${delta}` : "",
+    ].filter(Boolean));
     return;
   }
 
   /* ---------- 情况 2：已学本体 ---------- */
   const prog = getArtProgress(art.id);
 
-  /* 已达该残卷上限 */
   if (prog.maxLearn >= fragment.end) {
     log(`【${art.name}】已解锁至 Lv.${prog.maxLearn}，无需此残卷。`, "c-bad");
     return;
   }
 
-  /* 链式接续检查 */
   if (fragment.start !== prog.maxLearn + 1) {
     log(`【${art.name}】当前上限 Lv.${prog.maxLearn}，需先获得 Lv.${prog.maxLearn + 1} 起的残卷。`, "c-bad");
     return;
   }
 
-  /* B 规则：当前段必须圆满 */
   if (prog.lvl < prog.maxLearn) {
     log(`需先将【${art.name}】练至 Lv.${prog.maxLearn} 圆满，才能参悟下一卷。`, "c-bad");
     return;
   }
 
-  /* 消耗残卷 */
-  S.fragments[fragId]--;
-  if (S.fragments[fragId] <= 0) delete S.fragments[fragId];
+  removeItem(fragId, 1);
 
   prog.maxLearn = fragment.end;
 
@@ -153,17 +137,20 @@ function useFragment(fragId) {
   ]);
 }
 
-/* 列出玩家拥有的所有残卷（用于 UI） */
+/* 列出玩家拥有的所有残卷 */
 function listOwnedFragments() {
   const list = [];
-  if (!S.fragments) return list;
-  for (const fragId in S.fragments) {
-    if (S.fragments[fragId] <= 0) continue;
+  if (!S.inventory) return list;
+
+  for (const fragId in S.inventory) {
+    if (S.inventory[fragId] <= 0) continue;
+    const item = ITEMS[fragId];
+    if (!item || item.type !== "heartFragment") continue;
     const found = getFragmentById(fragId);
     if (!found) continue;
     list.push({
       id: fragId,
-      count: S.fragments[fragId],
+      count: S.inventory[fragId],
       fragment: found.fragment,
       art: found.art,
     });
@@ -171,36 +158,50 @@ function listOwnedFragments() {
   return list;
 }
 
-/* 随机抽一个残卷（用于探索/秘境掉落） */
+/* 随机抽一个残卷 */
 function getRandomFragment() {
-  const all = [];
-  for (const art of HEART_ARTS) {
-    if (!art.fragments) continue;
-    for (const f of art.fragments) {
-      all.push({ fragment: f, art });
-    }
-  }
+  const all = getAllItemsByType("heartFragment").map(item => {
+    const art = HEART_ARTS.find(a => a.id === item.artId);
+    if (!art) return null;
+    return {
+      fragment: { id: item.id, name: item.name, start: item.start, end: item.end },
+      art: art,
+    };
+  }).filter(Boolean);
+
   if (all.length === 0) return null;
   return pick(all);
 }
 
-/* 抽一个"玩家当前可用的下一卷"（可选，给掉落用）
-   优先级：未入门且 start=1 的 > 已入门且接得上的下一卷 */
+/* 抽一个"玩家当前可用的下一卷" */
 function getUsableFragment() {
+  const allFrags = getAllItemsByType("heartFragment");
   const pool = [];
-  for (const art of HEART_ARTS) {
-    if (!art.fragments) continue;
+
+  allFrags.forEach(item => {
+    const art = HEART_ARTS.find(a => a.id === item.artId);
+    if (!art) return;
+
     const learned = S.heartArts.learned.includes(art.id);
 
     if (!learned) {
-      const f = art.fragments.find(x => x.start === 1);
-      if (f) pool.push({ fragment: f, art });
+      if (item.start === 1) {
+        pool.push({
+          fragment: { id: item.id, name: item.name, start: item.start, end: item.end },
+          art: art,
+        });
+      }
     } else {
       const prog = getArtProgress(art.id);
-      const f = art.fragments.find(x => x.start === prog.maxLearn + 1);
-      if (f && prog.lvl >= prog.maxLearn) pool.push({ fragment: f, art });
+      if (item.start === prog.maxLearn + 1 && prog.lvl >= prog.maxLearn) {
+        pool.push({
+          fragment: { id: item.id, name: item.name, start: item.start, end: item.end },
+          art: art,
+        });
+      }
     }
-  }
+  });
+
   if (pool.length === 0) return getRandomFragment();
   return pick(pool);
 }

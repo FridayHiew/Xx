@@ -121,7 +121,7 @@ function exportEndingSave(endingKey) {
     realm: S.realm,
     sub: S.sub,
     root: S.roots,
-    talent: S.talent,
+    morality: S.morality,
     keyNPCs: S.npcs.filter(n => n.alive).map(n => ({ name: n.name, role: n.role, aff: n.aff })),
     timestamp: Date.now(),
   };

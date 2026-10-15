@@ -27,8 +27,8 @@ const TABS = [
 ];
 
 /* 角色面板 */
-const PROFILE_TABS = ["角色信息", "背包", "装配", "心法", "技能", "杂务", "爱好"];
-const BAG_TABS = ["丹药", "材料", "装备", "其他"];
+const PROFILE_TABS = ["角色信息", "心法", "法术", "装配", "背包", "杂务", "爱好"];
+const BAG_TABS = ["丹药", "材料", "装备", "秘籍", "逆天宝物", "任务道具", "其他"];
 
 /* 月俸 */
 const RANK_PAY = {
@@ -80,23 +80,29 @@ const LUNAR_MONTHS = [
   "七月", "八月", "九月", "十月", "冬月", "腊月",
 ]
 
+/* ============================================================
+   星期
+   ============================================================ */
+
+const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
+
 /* 晋升奖励 */
 const PROMOTION_REWARDS = {
   "门外": {
-    art: "lianqi_advanced",
     weapon: "e_sword_promotion",
     armor: "e_robe_promotion",
-    special: "choosePeak",
+    /* 残卷改由"上卷"（自动生成）代替，见 heart-arts.js */
+    fragments: [],
   },
   "门内": {
-    art: "lianqi_essence",
     weapon: "e_sword_mennei",
     armor: "e_robe_mennei",
+    fragments: [],
   },
   "真传": {
-    art: "lianqi_truth",
     weapon: "e_sword_zhenchuan",
     armor: "e_robe_zhenchuan",
+    fragments: [],
   },
 };
 
@@ -108,3 +114,42 @@ const FRAGMENT_PRICE = {
   7:  300,
   10: 500,
 };
+
+
+/* ============================================================
+   装备槽位
+   ============================================================ */
+
+const EQUIP_SLOTS = [
+  "head", "rightHand", "leftHand", "body", "shoes",
+  "accessory1", "accessory2",
+  "artifact1", "artifact2", "artifact3",
+  "pet", "mount", "heavenDefying",
+];
+
+const SLOT_NAMES = {
+  head: "头", rightHand: "右手", leftHand: "左手", body: "身体", shoes: "鞋子",
+  accessory1: "饰品1", accessory2: "饰品2",
+  artifact1: "法宝1", artifact2: "法宝2", artifact3: "法宝3",
+  pet: "灵宠", mount: "坐骑", heavenDefying: "逆天宝物",
+};
+
+/* 装备的 slot 是"类别"，映射到可装的具体槽位 */
+const SLOT_ACCEPT = {
+  head:          ["head"],
+  rightHand:     ["rightHand"],
+  leftHand:      ["leftHand"],
+  body:          ["body"],
+  shoes:         ["shoes"],
+  accessory:     ["accessory1", "accessory2"],
+  artifact:      ["artifact1", "artifact2", "artifact3"],
+  pet:           ["pet"],
+  mount:         ["mount"],
+  heavenDefying: ["heavenDefying"],
+};
+
+/* ============================================================
+   装备铺（宗门）
+   ============================================================ */
+
+   

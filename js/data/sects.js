@@ -2,10 +2,6 @@
    data/sects.js - 宗门 / 山峰
    ============================================================ */
 
-/* 宗门 */
-/* zheng / xie：心法正邪属性（用于匹配度） */
-/* requireZheng / requireXie：入门前的最低悟性（暂不检查） */
-/* requireRoot：入门最低灵根（暂不检查） */
 const SECTS = [
   { id: "qingyun",  name: "青云宗", camp: "正道", specialty: "剑修", art: "青云吐纳法", weapon: "青峰",
     desc: "剑意凌厉，正道领袖", accept: ["jin", "lei"], level: 1,

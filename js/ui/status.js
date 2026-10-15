@@ -42,8 +42,7 @@ function renderStatus() {
     <span><span>心法</span><b>${artName}</b></span>
     <span><span>心情</span><b style="font-size:16px;">${moodEmoji}</b></span>
     <span><span>${currencyLbl}</span><b>${currencyVal}</b></span>
-    <span><span>日期</span><b>逍遥${di.year}·${di.monthName}${di.day}日</b></span>
-    <span><span>贡献</span><b>${S.contrib}</b></span>
+    <span><span>日期</span><b>逍遥${di.year}·${di.monthName}${di.day}日 周${WEEKDAYS[S.weekday]}</b></span>    <span><span>贡献</span><b>${S.contrib}</b></span>
     ${fest ? `<span style="grid-column:1/-1;"><span class="tag festival-tag">${fest.name}</span> <span class="small">今日${fest.bonus}！</span></span>` : ''}
     <div class="bar-row"><span class="label">气血</span>
       <div class="bar-wrap"><div class="bar-fill bar-hp" style="width:${S.hp / totalMaxHp() * 100}%"></div><div class="bar-text">${Math.floor(S.hp)}/${totalMaxHp()}</div></div></div>

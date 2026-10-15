@@ -11,7 +11,7 @@ function renderDay() {
   const rank = S.flags.rank || "杂务";
   const remain = ACTIONS_PER_SLOT - S.actionsUsed;
 
-  let html = `<h3>今日 ${hourLabelHTML()}　第 ${S.day} 天</h3>
+  let html = `<h3>今日 ${hourLabelHTML()}　第 ${S.day} 天　周${WEEKDAYS[S.weekday]}</h3>
     <p class="small">本时段剩余行动：<b>${remain}</b> / ${ACTIONS_PER_SLOT}</p>`;
 
   if (S.dailyQuest) {
@@ -31,7 +31,7 @@ function renderDay() {
     html += `<button class="block" onclick="sleepToNextDay()">提前睡觉（放弃剩余行动）</button>`;
   }
 
-html += `<div style="margin-top:8px;">
+  html += `<div style="margin-top:8px;">
     <button class="debug" onclick="debugComplete()">[DEBUG] 圆满当前心法</button>
     <button class="debug" onclick="debugAddProficiency()">[DEBUG] 熟练度满</button>
     <button class="debug" onclick="debugAddMoney()">[DEBUG] 铜钱 +1000</button>
@@ -39,8 +39,15 @@ html += `<div style="margin-top:8px;">
     <button class="debug" onclick="debugAddContrib()">[DEBUG] 贡献 +100</button>
     <button class="debug" onclick="debugAddFragment()">[DEBUG] 随机残卷</button>
     <button class="debug" onclick="toggleDebugRoot()">[DEBUG] 显示灵根</button>
-
-  </div>`;
+    <button class="debug" onclick="debugStartBattleMulti()">[DEBUG] 测试群战</button>
+    <button class="debug" onclick="debugStartBattle()">[DEBUG] 测试战斗</button>
+    <button class="debug" onclick="debugFullHeal()">[DEBUG] 气血灵力全满</button>
+    <button class="debug" onclick="debugRestoreHp()">[DEBUG] 气血全满</button>
+    <button class="debug" onclick="debugRestoreMp()">[DEBUG] 灵力全满</button>
+    <button class="debug" onclick="debugPromoteToMennei()">[DEBUG] 晋升门内</button>
+    <button class="debug" onclick="debugAddMaterial()">[DEBUG] 加材料</button>
+    <button class="debug" onclick="debugAddRecipe()">[DEBUG] 加丹方</button>
+    </div>`;
 
   return html;
 }
@@ -89,10 +96,20 @@ function doAction(type) {
   }
   else if (type === "garden") {
     S.actionsUsed++;
-    const n = rndInt(1, 3);
-    S.mat["灵草"] = (S.mat["灵草"] || 0) + n;
-    log(`你打理药园，收获灵草 ×${n}。`, "c-good");
-    consumeAction(() => showActionModal("打理药园", [`灵草 +${n}`]));
+    /* 药园收获：按玩家境界掉 1~3 品材料 */
+    const count = rndInt(1, 3);
+    const range = getMaterialGradeRange();
+    /* 药园偏向低级材料 */
+    const grade = Math.min(range.max, Math.max(1, range.min));
+    const matBase = pick(["洗骨花", "草木灰", "清泉水"]);
+    const itemId = `${matBase}_${grade}`;
+    addItem(itemId, count);
+    const item = ITEMS[itemId];
+    const gradeText = item && item.grade ? `${item.grade}品` : "";
+    log(`你打理药园，收获 ${item ? item.name : matBase}${gradeText} ×${count}。`, "c-good");
+    consumeAction(() => showActionModal("打理药园", [
+      `收获：${item ? item.name : matBase}（${gradeText}）×${count}`,
+    ]));
   }
   else if (type === "practice") {
     S.actionsUsed++;
@@ -154,6 +171,7 @@ function newDay() {
   S.flags.breakAttemptedToday = false;
   S.day++;
   S.hour = 0;
+  S.weekday = (S.weekday + 1) % 7;
   S.life += 1 / 365;
   morningPrompted = false;
   nightPrompted = false;
@@ -164,6 +182,27 @@ function newDay() {
   S.flags.npcDailyDay = S.day;
 
   if (S.life >= S.lifeMax) { die("寿元耗尽，坐化于洞府之中。"); return; }
+
+  /* 处理残留 DOT */
+  if (processDailyStatus()) return;
+
+  /* 灵宠日常 */
+  const deadPets = processDailyPets();
+  if (deadPets.length > 0) {
+    setTimeout(() => {
+      showModal("灵宠饿死", `<p>${deadPets.map(p => p.name).join("、")} 因饥饿而死。</p>`, [
+        { label: "知道了", fn: closeModal }
+      ]);
+    }, 500);
+  }
+
+  /* 逆天宝物日常 */
+  if (typeof processDailyHeavenDefying === "function") {
+    processDailyHeavenDefying();
+  }
+
+  /* 丹药 buff 每日清理 */
+  processDailyPillBuff();
 
   checkMonthlyPay();
   checkFestival();
@@ -182,13 +221,55 @@ function newDay() {
   checkMasterDeath();
   checkFinalBattle();
 
-  /* 如果结局已触发，就不再继续 */
   if (S.flags.story.year1004 && S.flags.story.year1004.final) {
     return;
   }
 
   morningPrompt();
   render();
+}
+
+/* ============================================================
+   每日清理丹药 buff
+   ============================================================ */
+
+function processDailyPillBuff() {
+  /* 修炼 buff：扣天数 */
+  if (S.flags.cultivateBuff) {
+    S.flags.cultivateBuff.days = (S.flags.cultivateBuff.days || 0) - 1;
+    if (S.flags.cultivateBuff.days <= 0) {
+      delete S.flags.cultivateBuff;
+    }
+  }
+
+  /* 血煞丹 buff：扣天数 */
+  if (S.flags.bloodRage) {
+    S.flags.bloodRage.days = (S.flags.bloodRage.days || 0) - 1;
+    if (S.flags.bloodRage.days <= 0) {
+      delete S.flags.bloodRage;
+    }
+  }
+
+  /* 突破加成 buff：一次性，新一天清除 */
+  if (S.flags.pillBuff && S.flags.pillBuff.breakBonus) {
+    /* 保留，等突破时消耗（见 cultivate.js 的 calcBreakRate） */
+    /* 这里不动 */
+  }
+
+  /* 炼丹 buff：凝火丹（新一天清除） */
+  if (S.flags.alchemyBuff) {
+    if (typeof processDailyAlchemyBuff === "function") {
+      processDailyAlchemyBuff();
+    } else {
+      delete S.flags.alchemyBuff;
+    }
+  }
+
+  /* 炼器 buff */
+  if (S.flags.forgeBuff) delete S.flags.forgeBuff;
+  if (S.flags.forgeProtect) delete S.flags.forgeProtect;
+
+  /* 灵宠每日 buff 相关（保留） */
 }
 
 function checkSickness() {

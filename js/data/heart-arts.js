@@ -1,68 +1,33 @@
 /* ============================================================
-   data/heart-arts.js - 心法（35 本）
-   
-   新字段：
-   - category: "练体" / "练法"
-   - element: 五行属性 id（null=无属性）
-   - baseLearn: 默认解锁等级（心法自带）
-   - fragments: 残卷列表（可空）
+   data/heart-arts.js - 心法
    ============================================================ */
 
 const HEART_ARTS = [
-  /* ===== 通用练气基础（1 本，凡人可学） ===== */
-
-{ id: "lianqi_basic", name: "练气基础", realm: 0, maxLvl: 10, type: "中立",
-  category: "练法", element: null,
-  baseLearn: 3,   /* ← 改成 3，和开局 maxLearn 一致 */
-  fragments: [
-    { id: "lianqi_basic_f2", name: "练气基础·中卷", start: 4, end: 6 },
-    { id: "lianqi_basic_f3", name: "练气基础·下卷", start: 7, end: 10 },
-  ],
-  reqZheng: 0, reqXie: 0, reqRoot: 1, sect: null,
-  desc: "最基础的练气心法，含中下两卷",
-    levels: [
-      { lvl: 1,  power: 50,  atk: 3,  def: 1,  mp: 5,   hp: 10,  expNeed: 100 },
-      { lvl: 2,  power: 62,  atk: 4,  def: 2,  mp: 7,   hp: 18,  expNeed: 150 },
-      { lvl: 3,  power: 76,  atk: 6,  def: 3,  mp: 10,  hp: 28,  expNeed: 220 },
-      { lvl: 4,  power: 92,  atk: 8,  def: 4,  mp: 13,  hp: 40,  expNeed: 300 },
-      { lvl: 5,  power: 110, atk: 11, def: 5,  mp: 17,  hp: 54,  expNeed: 400 },
-      { lvl: 6,  power: 130, atk: 14, def: 7,  mp: 21,  hp: 70,  expNeed: 520 },
-      { lvl: 7,  power: 152, atk: 18, def: 9,  mp: 26,  hp: 88,  expNeed: 660 },
-      { lvl: 8,  power: 176, atk: 22, def: 11, mp: 31,  hp: 108, expNeed: 820 },
-      { lvl: 9,  power: 202, atk: 27, def: 13, mp: 37,  hp: 130, expNeed: 1000 },
-      { lvl: 10, power: 230, atk: 32, def: 16, mp: 43,  hp: 155, expNeed: 0 },
-    ],
-},
-
- { id: "lianqi_basic2", name: "练气基础2", realm: 1, maxLvl: 10, type: "中立",
+  /* ===== 通用练气基础（凡人可学，开局赠送） ===== */
+  { id: "lianqi_basic", name: "练气基础", realm: 1, maxLvl: 10, type: "中立",
     category: "练法", element: null,
-    baseLearn: 0,
-    fragments: [
-      { id: "lianqi_basic_f1", name: "练气基础·上卷", start: 1, end: 3 },
-      { id: "lianqi_basic_f2", name: "练气基础·中卷", start: 4, end: 6 },
-      { id: "lianqi_basic_f3", name: "练气基础·下卷", start: 7, end: 10 },
-    ],
-    reqZheng: 0, reqXie: 0, reqRoot: 1, sect: null,
-    desc: "最基础的练气心法，含上中下三卷",
+    baseLearn: 3,
+    reqRoot: 1, sect: null,
+    desc: "最基础的练气心法，含中下两卷",
     levels: [
-      { lvl: 1,  power: 50,  atk: 3,  def: 1,  mp: 5,   hp: 10,  expNeed: 100 },
-      { lvl: 2,  power: 62,  atk: 4,  def: 2,  mp: 7,   hp: 18,  expNeed: 150 },
-      { lvl: 3,  power: 76,  atk: 6,  def: 3,  mp: 10,  hp: 28,  expNeed: 220 },
-      { lvl: 4,  power: 92,  atk: 8,  def: 4,  mp: 13,  hp: 40,  expNeed: 300 },
-      { lvl: 5,  power: 110, atk: 11, def: 5,  mp: 17,  hp: 54,  expNeed: 400 },
-      { lvl: 6,  power: 130, atk: 14, def: 7,  mp: 21,  hp: 70,  expNeed: 520 },
-      { lvl: 7,  power: 152, atk: 18, def: 9,  mp: 26,  hp: 88,  expNeed: 660 },
-      { lvl: 8,  power: 176, atk: 22, def: 11, mp: 31,  hp: 108, expNeed: 820 },
-      { lvl: 9,  power: 202, atk: 27, def: 13, mp: 37,  hp: 130, expNeed: 1000 },
-      { lvl: 10, power: 230, atk: 32, def: 16, mp: 43,  hp: 155, expNeed: 0 },
+      { lvl: 1,  power: 50,  atk: 3,  def: 1,  mp: 5,   hp: 10, speed: 1,  expNeed: 100 },
+      { lvl: 2,  power: 62,  atk: 4,  def: 2,  mp: 7,   hp: 18, speed: 1,  expNeed: 150 },
+      { lvl: 3,  power: 76,  atk: 6,  def: 3,  mp: 10,  hp: 28, speed: 1,  expNeed: 220 },
+      { lvl: 4,  power: 92,  atk: 8,  def: 4,  mp: 13,  hp: 40, speed: 1,  expNeed: 300 },
+      { lvl: 5,  power: 110, atk: 11, def: 5,  mp: 17,  hp: 54, speed: 1,  expNeed: 400 },
+      { lvl: 6,  power: 130, atk: 14, def: 7,  mp: 21,  hp: 70, speed: 1,  expNeed: 520 },
+      { lvl: 7,  power: 152, atk: 18, def: 9,  mp: 26,  hp: 88, speed: 1,  expNeed: 660 },
+      { lvl: 8,  power: 176, atk: 22, def: 11, mp: 31,  hp: 108, speed: 1, expNeed: 820 },
+      { lvl: 9,  power: 202, atk: 27, def: 13, mp: 37,  hp: 130, speed: 1, expNeed: 1000 },
+      { lvl: 10, power: 230, atk: 32, def: 16, mp: 43,  hp: 155, speed: 1, expNeed: 0 },
     ],
   },
 
-  /* ========== 2. 金属性练气基础（无残卷，baseLearn=10） ========== */
-  { id: "lianqi_jin", name: "金属性练气基础", realm: 0, maxLvl: 10, type: "正",
+  /* ===== 属性练气基础 ===== */
+  { id: "lianqi_jin", name: "金属性练气基础", realm: 1, maxLvl: 10, type: "正",
     category: "练法", element: "jin",
-    baseLearn: 10, fragments: [],
-    reqZheng: 0, reqXie: 0, reqRoot: 1, sect: null,
+    baseLearn: 10,
+    reqRoot: 1, sect: null,
     desc: "金属性练气心法，可一次练至十重",
     levels: [
       { lvl: 1,  power: 55,  atk: 5,  def: 1,  mp: 5,   hp: 10,  expNeed: 120 },
@@ -78,11 +43,10 @@ const HEART_ARTS = [
     ],
   },
 
-  /* ========== 3. 木属性练气基础（无残卷，baseLearn=5） ========== */
-  { id: "lianqi_mu", name: "木属性练气基础", realm: 0, maxLvl: 5, type: "正",
+  { id: "lianqi_mu", name: "木属性练气基础", realm: 1, maxLvl: 5, type: "正",
     category: "练体", element: "mu",
-    baseLearn: 5, fragments: [],
-    reqZheng: 0, reqXie: 0, reqRoot: 1, sect: null,
+    baseLearn: 5,
+    reqRoot: 1, sect: null,
     desc: "木属性练气心法，可一次练至五重",
     levels: [
       { lvl: 1, power: 50,  atk: 3,  def: 3,  mp: 6,   hp: 18,  expNeed: 120 },
@@ -93,12 +57,31 @@ const HEART_ARTS = [
     ],
   },
 
+  /* ===== 通用练气（宗门直接兑换本体） ===== */
+  { id: "minghuo_heart", name: "明火心法", realm: 1, maxLvl: 10, type: "中立",
+    category: "练法", element: "huo",
+    baseLearn: 3,
+    reqRoot: 1, sect: null,
+    desc: "引火入体，火属性基础心法。",
+    levels: [
+      { lvl: 1,  power: 55,  atk: 5,  def: 1,  mp: 5,   hp: 10,  expNeed: 120 },
+      { lvl: 2,  power: 70,  atk: 7,  def: 2,  mp: 7,   hp: 18,  expNeed: 170 },
+      { lvl: 3,  power: 87,  atk: 10, def: 3,  mp: 10,  hp: 28,  expNeed: 240 },
+      { lvl: 4,  power: 106, atk: 13, def: 4,  mp: 13,  hp: 40,  expNeed: 330 },
+      { lvl: 5,  power: 127, atk: 17, def: 5,  mp: 17,  hp: 54,  expNeed: 440 },
+      { lvl: 6,  power: 150, atk: 21, def: 7,  mp: 21,  hp: 70,  expNeed: 570 },
+      { lvl: 7,  power: 175, atk: 26, def: 9,  mp: 26,  hp: 88,  expNeed: 720 },
+      { lvl: 8,  power: 202, atk: 31, def: 11, mp: 31,  hp: 108, expNeed: 890 },
+      { lvl: 9,  power: 231, atk: 37, def: 13, mp: 37,  hp: 130, expNeed: 1080 },
+      { lvl: 10, power: 262, atk: 44, def: 16, mp: 43,  hp: 155, expNeed: 0 },
+    ],
+  },
 
   /* ===== 宗门专属练气（15 本） ===== */
   { id: "qingyun_lianqi", name: "青云吐纳法", realm: 1, maxLvl: 3, type: "正",
     category: "练法", element: "jin",
-    baseLearn: 3, fragments: [],
-    reqZheng: 30, reqXie: 0, reqRoot: 2, sect: "qingyun",
+    baseLearn: 3,
+    reqRoot: 2, sect: "qingyun",
     desc: "青云宗练气心法，剑修专精",
     levels: [
       { lvl: 1, power: 60,  atk: 4,  def: 2,  mp: 6,  hp: 15, expNeed: 120 },
@@ -108,8 +91,8 @@ const HEART_ARTS = [
   },
   { id: "danxia_lianqi", name: "丹霞凝气诀", realm: 1, maxLvl: 3, type: "正",
     category: "练法", element: "huo",
-    baseLearn: 3, fragments: [],
-    reqZheng: 30, reqXie: 0, reqRoot: 2, sect: "danxia",
+    baseLearn: 3,
+    reqRoot: 2, sect: "danxia",
     desc: "丹霞谷练气心法，炼丹专精",
     levels: [
       { lvl: 1, power: 58,  atk: 3,  def: 2,  mp: 7,  hp: 18, expNeed: 120 },
@@ -119,8 +102,8 @@ const HEART_ARTS = [
   },
   { id: "hehuan_lianqi", name: "合欢双修法", realm: 1, maxLvl: 3, type: "中立",
     category: "练法", element: "shui",
-    baseLearn: 3, fragments: [],
-    reqZheng: 30, reqXie: 30, reqRoot: 2, sect: "hehuan",
+    baseLearn: 3,
+    reqRoot: 2, sect: "hehuan",
     desc: "合欢宗练气心法，双修专精",
     levels: [
       { lvl: 1, power: 55,  atk: 3,  def: 2,  mp: 8,  hp: 15, expNeed: 120 },
@@ -130,8 +113,8 @@ const HEART_ARTS = [
   },
   { id: "wanshou_lianqi", name: "万兽心法", realm: 1, maxLvl: 3, type: "中立",
     category: "练体", element: "tu",
-    baseLearn: 3, fragments: [],
-    reqZheng: 30, reqXie: 30, reqRoot: 2, sect: "wanshou",
+    baseLearn: 3,
+    reqRoot: 2, sect: "wanshou",
     desc: "万兽门练气心法，御兽专精",
     levels: [
       { lvl: 1, power: 58,  atk: 4,  def: 2,  mp: 5,  hp: 20, expNeed: 120 },
@@ -141,8 +124,8 @@ const HEART_ARTS = [
   },
   { id: "tianji_lianqi", name: "天机阵道", realm: 1, maxLvl: 3, type: "中立",
     category: "练法", element: "tu",
-    baseLearn: 3, fragments: [],
-    reqZheng: 30, reqXie: 30, reqRoot: 2, sect: "tianji",
+    baseLearn: 3,
+    reqRoot: 2, sect: "tianji",
     desc: "天机阁练气心法，阵法专精",
     levels: [
       { lvl: 1, power: 55,  atk: 3,  def: 3,  mp: 10, hp: 12, expNeed: 120 },
@@ -152,8 +135,8 @@ const HEART_ARTS = [
   },
   { id: "fulu_lianqi", name: "符箓心经", realm: 1, maxLvl: 3, type: "中立",
     category: "练法", element: "jin",
-    baseLearn: 3, fragments: [],
-    reqZheng: 30, reqXie: 30, reqRoot: 2, sect: "fulu",
+    baseLearn: 3,
+    reqRoot: 2, sect: "fulu",
     desc: "符箓宗练气心法，符箓专精",
     levels: [
       { lvl: 1, power: 60,  atk: 4,  def: 2,  mp: 8,  hp: 12, expNeed: 120 },
@@ -163,8 +146,8 @@ const HEART_ARTS = [
   },
   { id: "youming_lianqi", name: "幽冥引魂诀", realm: 1, maxLvl: 3, type: "邪",
     category: "练法", element: "shui",
-    baseLearn: 3, fragments: [],
-    reqZheng: 0, reqXie: 30, reqRoot: 2, sect: "youming",
+    baseLearn: 3,
+    reqRoot: 2, sect: "youming",
     desc: "幽冥宗练气心法，鬼修专精",
     levels: [
       { lvl: 1, power: 62,  atk: 5,  def: 1,  mp: 6,  hp: 12, expNeed: 120 },
@@ -174,8 +157,8 @@ const HEART_ARTS = [
   },
   { id: "xuemou_lianqi", name: "血魔炼气诀", realm: 1, maxLvl: 3, type: "邪",
     category: "练体", element: "huo",
-    baseLearn: 3, fragments: [],
-    reqZheng: 0, reqXie: 30, reqRoot: 2, sect: "xuemou",
+    baseLearn: 3,
+    reqRoot: 2, sect: "xuemou",
     desc: "血魔宗练气心法，血修专精",
     levels: [
       { lvl: 1, power: 65,  atk: 6,  def: 1,  mp: 4,  hp: 15, expNeed: 120 },
@@ -185,8 +168,8 @@ const HEART_ARTS = [
   },
   { id: "xuanbing_lianqi", name: "玄冰凝气诀", realm: 1, maxLvl: 3, type: "正",
     category: "练法", element: "bing",
-    baseLearn: 3, fragments: [],
-    reqZheng: 30, reqXie: 0, reqRoot: 2, sect: "xuanbing",
+    baseLearn: 3,
+    reqRoot: 2, sect: "xuanbing",
     desc: "玄冰宫练气心法，冰修专精",
     levels: [
       { lvl: 1, power: 55,  atk: 3,  def: 3,  mp: 8,  hp: 15, expNeed: 120 },
@@ -196,8 +179,8 @@ const HEART_ARTS = [
   },
   { id: "leiyin_lianqi", name: "雷音梵音诀", realm: 1, maxLvl: 3, type: "正",
     category: "练体", element: "lei",
-    baseLearn: 3, fragments: [],
-    reqZheng: 35, reqXie: 0, reqRoot: 2, sect: "leiyin",
+    baseLearn: 3,
+    reqRoot: 2, sect: "leiyin",
     desc: "雷音寺练气心法，佛修专精",
     levels: [
       { lvl: 1, power: 58,  atk: 4,  def: 3,  mp: 6,  hp: 18, expNeed: 120 },
@@ -207,8 +190,8 @@ const HEART_ARTS = [
   },
   { id: "yaowang_lianqi", name: "药王养生诀", realm: 1, maxLvl: 3, type: "正",
     category: "练体", element: "mu",
-    baseLearn: 3, fragments: [],
-    reqZheng: 30, reqXie: 0, reqRoot: 2, sect: "yaowang",
+    baseLearn: 3,
+    reqRoot: 2, sect: "yaowang",
     desc: "药王谷练气心法，医修专精",
     levels: [
       { lvl: 1, power: 50,  atk: 2,  def: 2,  mp: 8,  hp: 25, expNeed: 120 },
@@ -218,8 +201,8 @@ const HEART_ARTS = [
   },
   { id: "jianzhong_lianqi", name: "剑冢养剑诀", realm: 1, maxLvl: 3, type: "中立",
     category: "练法", element: "jin",
-    baseLearn: 3, fragments: [],
-    reqZheng: 30, reqXie: 30, reqRoot: 2, sect: "jianzhong",
+    baseLearn: 3,
+    reqRoot: 2, sect: "jianzhong",
     desc: "剑冢练气心法，剑修专精",
     levels: [
       { lvl: 1, power: 62,  atk: 5,  def: 1,  mp: 5,  hp: 12, expNeed: 120 },
@@ -229,8 +212,8 @@ const HEART_ARTS = [
   },
   { id: "linglong_lianqi", name: "玲珑纳气诀", realm: 1, maxLvl: 3, type: "中立",
     category: "练法", element: "jin",
-    baseLearn: 3, fragments: [],
-    reqZheng: 30, reqXie: 30, reqRoot: 2, sect: "linglong",
+    baseLearn: 3,
+    reqRoot: 2, sect: "linglong",
     desc: "玲珑阁练气心法，商修专精",
     levels: [
       { lvl: 1, power: 52,  atk: 3,  def: 2,  mp: 10, hp: 12, expNeed: 120 },
@@ -240,8 +223,8 @@ const HEART_ARTS = [
   },
   { id: "huanyue_lianqi", name: "幻月梦引诀", realm: 1, maxLvl: 3, type: "中立",
     category: "练法", element: "shui",
-    baseLearn: 3, fragments: [],
-    reqZheng: 30, reqXie: 30, reqRoot: 2, sect: "huanyue",
+    baseLearn: 3,
+    reqRoot: 2, sect: "huanyue",
     desc: "幻月宗练气心法，幻修专精",
     levels: [
       { lvl: 1, power: 55,  atk: 3,  def: 2,  mp: 9,  hp: 12, expNeed: 120 },
@@ -251,8 +234,8 @@ const HEART_ARTS = [
   },
   { id: "xingchen_lianqi", name: "星辰观想诀", realm: 1, maxLvl: 3, type: "正",
     category: "练法", element: "lei",
-    baseLearn: 3, fragments: [],
-    reqZheng: 30, reqXie: 0, reqRoot: 2, sect: "xingchen",
+    baseLearn: 3,
+    reqRoot: 2, sect: "xingchen",
     desc: "星辰阁练气心法，全能专精",
     levels: [
       { lvl: 1, power: 60,  atk: 4,  def: 3,  mp: 8,  hp: 15, expNeed: 120 },
@@ -265,10 +248,7 @@ const HEART_ARTS = [
   { id: "lianqi_advanced", name: "练气进阶", realm: 1, maxLvl: 6, type: "中立",
     category: "练法", element: null,
     baseLearn: 3,
-    fragments: [
-      { id: "lianqi_advanced_f2", name: "练气进阶·中卷", start: 4, end: 6 },
-    ],
-    reqZheng: 0, reqXie: 0, reqRoot: 1, sect: null,
+    reqRoot: 1, sect: null,
     desc: "门外弟子心法，可练至六重",
     levels: [
       { lvl: 1, power: 70,  atk: 5,  def: 2,  mp: 8,  hp: 20, expNeed: 150 },
@@ -282,10 +262,7 @@ const HEART_ARTS = [
   { id: "lianqi_essence", name: "练气精要", realm: 1, maxLvl: 6, type: "中立",
     category: "练体", element: null,
     baseLearn: 3,
-    fragments: [
-      { id: "lianqi_essence_f2", name: "练气精要·中卷", start: 4, end: 6 },
-    ],
-    reqZheng: 0, reqXie: 0, reqRoot: 2, sect: null,
+    reqRoot: 2, sect: null,
     desc: "门内弟子心法，可练至六重",
     levels: [
       { lvl: 1, power: 85,  atk: 7,  def: 3,  mp: 10, hp: 25, expNeed: 180 },
@@ -299,11 +276,7 @@ const HEART_ARTS = [
   { id: "lianqi_truth", name: "练气真解", realm: 1, maxLvl: 10, type: "中立",
     category: "练法", element: null,
     baseLearn: 3,
-    fragments: [
-      { id: "lianqi_truth_f2", name: "练气真解·中卷", start: 4, end: 6 },
-      { id: "lianqi_truth_f3", name: "练气真解·下卷", start: 7, end: 10 },
-    ],
-    reqZheng: 0, reqXie: 0, reqRoot: 3, sect: null,
+    reqRoot: 3, sect: null,
     desc: "真传弟子心法，可练至十重（炼气圆满）",
     levels: [
       { lvl: 1,  power: 100, atk: 9,  def: 4,  mp: 12,  hp: 30,  expNeed: 200 },
@@ -319,18 +292,11 @@ const HEART_ARTS = [
     ],
   },
 
-  /* ===== 通用筑基/金丹（8 本） ===== */
-
-
-
-
+  /* ===== 通用筑基 ===== */
   { id: "zhuji_basic_z", name: "筑基基础", realm: 2, maxLvl: 5, type: "正",
     category: "练法", element: null,
     baseLearn: 3,
-    fragments: [
-      { id: "zhuji_basic_z_f2", name: "筑基基础·下卷", start: 4, end: 5 },
-    ],
-    reqZheng: 40, reqXie: 0, reqRoot: 3, sect: null,
+    reqRoot: 3, sect: null,
     desc: "通用筑基心法",
     levels: [
       { lvl: 1, power: 200, atk: 15, def: 8,  mp: 20, hp: 60, expNeed: 500 },
@@ -340,79 +306,10 @@ const HEART_ARTS = [
       { lvl: 5, power: 500, atk: 52, def: 27, mp: 70, hp: 210, expNeed: 0 },
     ],
   },
-
-  /* ========== 1. 练气基础（含残卷，baseLearn=0） ========== */
-  { id: "lianqi_basic", name: "练气基础", realm: 0, maxLvl: 10, type: "中立",
-    category: "练法", element: null,
-    baseLearn: 0,
-    fragments: [
-      { id: "lianqi_basic_f1", name: "练气基础·上卷", start: 1, end: 3 },
-      { id: "lianqi_basic_f2", name: "练气基础·中卷", start: 4, end: 6 },
-      { id: "lianqi_basic_f3", name: "练气基础·下卷", start: 7, end: 10 },
-    ],
-    reqZheng: 0, reqXie: 0, reqRoot: 1, sect: null,
-    desc: "最基础的练气心法，含上中下三卷",
-    levels: [
-      { lvl: 1,  power: 50,  atk: 3,  def: 1,  mp: 5,   hp: 10,  expNeed: 100 },
-      { lvl: 2,  power: 62,  atk: 4,  def: 2,  mp: 7,   hp: 18,  expNeed: 150 },
-      { lvl: 3,  power: 76,  atk: 6,  def: 3,  mp: 10,  hp: 28,  expNeed: 220 },
-      { lvl: 4,  power: 92,  atk: 8,  def: 4,  mp: 13,  hp: 40,  expNeed: 300 },
-      { lvl: 5,  power: 110, atk: 11, def: 5,  mp: 17,  hp: 54,  expNeed: 400 },
-      { lvl: 6,  power: 130, atk: 14, def: 7,  mp: 21,  hp: 70,  expNeed: 520 },
-      { lvl: 7,  power: 152, atk: 18, def: 9,  mp: 26,  hp: 88,  expNeed: 660 },
-      { lvl: 8,  power: 176, atk: 22, def: 11, mp: 31,  hp: 108, expNeed: 820 },
-      { lvl: 9,  power: 202, atk: 27, def: 13, mp: 37,  hp: 130, expNeed: 1000 },
-      { lvl: 10, power: 230, atk: 32, def: 16, mp: 43,  hp: 155, expNeed: 0 },
-    ],
-  },
-
-  /* ========== 2. 金属性练气基础（无残卷，baseLearn=10） ========== */
-  { id: "lianqi_jin", name: "金属性练气基础", realm: 1, maxLvl: 10, type: "正",
-    category: "练法", element: "jin",
-    baseLearn: 10, fragments: [],
-    reqZheng: 0, reqXie: 0, reqRoot: 1, sect: null,
-    desc: "金属性练气心法，可一次练至十重",
-    levels: [
-      { lvl: 1,  power: 55,  atk: 5,  def: 1,  mp: 5,   hp: 10,  expNeed: 120 },
-      { lvl: 2,  power: 70,  atk: 7,  def: 2,  mp: 7,   hp: 18,  expNeed: 170 },
-      { lvl: 3,  power: 87,  atk: 10, def: 3,  mp: 10,  hp: 28,  expNeed: 240 },
-      { lvl: 4,  power: 106, atk: 13, def: 4,  mp: 13,  hp: 40,  expNeed: 330 },
-      { lvl: 5,  power: 127, atk: 17, def: 5,  mp: 17,  hp: 54,  expNeed: 440 },
-      { lvl: 6,  power: 150, atk: 21, def: 7,  mp: 21,  hp: 70,  expNeed: 570 },
-      { lvl: 7,  power: 175, atk: 26, def: 9,  mp: 26,  hp: 88,  expNeed: 720 },
-      { lvl: 8,  power: 202, atk: 31, def: 11, mp: 31,  hp: 108, expNeed: 890 },
-      { lvl: 9,  power: 231, atk: 37, def: 13, mp: 37,  hp: 130, expNeed: 1080 },
-      { lvl: 10, power: 262, atk: 44, def: 16, mp: 43,  hp: 155, expNeed: 0 },
-    ],
-  },
-
-  /* ========== 3. 木属性练气基础（无残卷，baseLearn=5） ========== */
-  { id: "lianqi_mu", name: "木属性练气基础", realm: 1, maxLvl: 5, type: "正",
-    category: "练体", element: "mu",
-    baseLearn: 5, fragments: [],
-    reqZheng: 0, reqXie: 0, reqRoot: 1, sect: null,
-    desc: "木属性练气心法，可一次练至五重",
-    levels: [
-      { lvl: 1, power: 50,  atk: 3,  def: 3,  mp: 6,   hp: 18,  expNeed: 120 },
-      { lvl: 2, power: 64,  atk: 4,  def: 5,  mp: 9,   hp: 32,  expNeed: 170 },
-      { lvl: 3, power: 80,  atk: 6,  def: 7,  mp: 12,  hp: 48,  expNeed: 240 },
-      { lvl: 4, power: 98,  atk: 8,  def: 10, mp: 16,  hp: 68,  expNeed: 330 },
-      { lvl: 5, power: 118, atk: 11, def: 13, mp: 20,  hp: 90,  expNeed: 0 },
-    ],
-  },
-
-
-
-
-
-
   { id: "zhuji_mid_z", name: "筑基进阶", realm: 2, maxLvl: 5, type: "正",
     category: "练法", element: null,
     baseLearn: 3,
-    fragments: [
-      { id: "zhuji_mid_z_f2", name: "筑基进阶·下卷", start: 4, end: 5 },
-    ],
-    reqZheng: 55, reqXie: 0, reqRoot: 4, sect: null,
+    reqRoot: 4, sect: null,
     desc: "通用筑基心法",
     levels: [
       { lvl: 1, power: 250, atk: 20, def: 10, mp: 25, hp: 75, expNeed: 600 },
@@ -425,10 +322,7 @@ const HEART_ARTS = [
   { id: "zhuji_basic_x", name: "邪基基础", realm: 2, maxLvl: 5, type: "邪",
     category: "练体", element: null,
     baseLearn: 3,
-    fragments: [
-      { id: "zhuji_basic_x_f2", name: "邪基基础·下卷", start: 4, end: 5 },
-    ],
-    reqZheng: 0, reqXie: 40, reqRoot: 3, sect: null,
+    reqRoot: 3, sect: null,
     desc: "通用邪基心法",
     levels: [
       { lvl: 1, power: 210, atk: 18, def: 6,  mp: 15, hp: 55, expNeed: 500 },
@@ -441,10 +335,7 @@ const HEART_ARTS = [
   { id: "zhuji_mid_x", name: "邪基进阶", realm: 2, maxLvl: 5, type: "邪",
     category: "练体", element: null,
     baseLearn: 3,
-    fragments: [
-      { id: "zhuji_mid_x_f2", name: "邪基进阶·下卷", start: 4, end: 5 },
-    ],
-    reqZheng: 0, reqXie: 55, reqRoot: 4, sect: null,
+    reqRoot: 4, sect: null,
     desc: "通用邪基心法",
     levels: [
       { lvl: 1, power: 265, atk: 24, def: 8,  mp: 20, hp: 70, expNeed: 600 },
@@ -454,14 +345,12 @@ const HEART_ARTS = [
       { lvl: 5, power: 645, atk: 75, def: 30, mp: 70, hp: 245, expNeed: 0 },
     ],
   },
+
+  /* ===== 通用金丹 ===== */
   { id: "jindan_basic_z", name: "金丹基础", realm: 3, maxLvl: 7, type: "正",
     category: "练法", element: null,
     baseLearn: 3,
-    fragments: [
-      { id: "jindan_basic_z_f2", name: "金丹基础·中卷", start: 4, end: 6 },
-      { id: "jindan_basic_z_f3", name: "金丹基础·下卷", start: 7, end: 7 },
-    ],
-    reqZheng: 50, reqXie: 0, reqRoot: 4, sect: null,
+    reqRoot: 4, sect: null,
     desc: "通用金丹心法",
     levels: [
       { lvl: 1, power: 600,  atk: 45,  def: 25, mp: 50, hp: 180, expNeed: 1500 },
@@ -476,11 +365,7 @@ const HEART_ARTS = [
   { id: "jindan_mid_z", name: "金丹进阶", realm: 3, maxLvl: 7, type: "正",
     category: "练法", element: null,
     baseLearn: 3,
-    fragments: [
-      { id: "jindan_mid_z_f2", name: "金丹进阶·中卷", start: 4, end: 6 },
-      { id: "jindan_mid_z_f3", name: "金丹进阶·下卷", start: 7, end: 7 },
-    ],
-    reqZheng: 65, reqXie: 0, reqRoot: 5, sect: null,
+    reqRoot: 5, sect: null,
     desc: "通用金丹心法",
     levels: [
       { lvl: 1, power: 720,  atk: 55,  def: 30, mp: 60, hp: 210, expNeed: 1800 },
@@ -495,11 +380,7 @@ const HEART_ARTS = [
   { id: "jindan_basic_x", name: "邪丹基础", realm: 3, maxLvl: 7, type: "邪",
     category: "练体", element: null,
     baseLearn: 3,
-    fragments: [
-      { id: "jindan_basic_x_f2", name: "邪丹基础·中卷", start: 4, end: 6 },
-      { id: "jindan_basic_x_f3", name: "邪丹基础·下卷", start: 7, end: 7 },
-    ],
-    reqZheng: 0, reqXie: 50, reqRoot: 4, sect: null,
+    reqRoot: 4, sect: null,
     desc: "通用邪丹心法",
     levels: [
       { lvl: 1, power: 630,  atk: 52,  def: 20, mp: 45, hp: 165, expNeed: 1500 },
@@ -514,11 +395,7 @@ const HEART_ARTS = [
   { id: "jindan_mid_x", name: "邪丹进阶", realm: 3, maxLvl: 7, type: "邪",
     category: "练体", element: null,
     baseLearn: 3,
-    fragments: [
-      { id: "jindan_mid_x_f2", name: "邪丹进阶·中卷", start: 4, end: 6 },
-      { id: "jindan_mid_x_f3", name: "邪丹进阶·下卷", start: 7, end: 7 },
-    ],
-    reqZheng: 0, reqXie: 65, reqRoot: 5, sect: null,
+    reqRoot: 5, sect: null,
     desc: "通用邪丹心法",
     levels: [
       { lvl: 1, power: 760,  atk: 62,  def: 25, mp: 55, hp: 195, expNeed: 1800 },
@@ -531,14 +408,12 @@ const HEART_ARTS = [
     ],
   },
 
-  /* ===== 宗门专属筑基/金丹（8 本） ===== */
+  /* ===== 宗门专属筑基/金丹 ===== */
   { id: "qingyun_sword", name: "青云剑诀", realm: 2, maxLvl: 5, type: "正",
     category: "练法", element: "jin",
     baseLearn: 3,
-    fragments: [
-      { id: "qingyun_sword_f2", name: "青云剑诀·下卷", start: 4, end: 5 },
-    ],
-    reqZheng: 60, reqXie: 0, reqRoot: 3, sect: "qingyun",
+    reqMorality: { min: 80 },
+    reqRoot: 3, sect: "qingyun",
     desc: "青云宗镇派剑诀",
     levels: [
       { lvl: 1, power: 280, atk: 25, def: 8,  mp: 20, hp: 65, expNeed: 600 },
@@ -551,10 +426,7 @@ const HEART_ARTS = [
   { id: "danxia_heart", name: "丹霞真经", realm: 2, maxLvl: 5, type: "正",
     category: "练法", element: "huo",
     baseLearn: 3,
-    fragments: [
-      { id: "danxia_heart_f2", name: "丹霞真经·下卷", start: 4, end: 5 },
-    ],
-    reqZheng: 60, reqXie: 0, reqRoot: 3, sect: "danxia",
+    reqRoot: 3, sect: "danxia",
     desc: "丹霞谷镇派心法",
     levels: [
       { lvl: 1, power: 260, atk: 20, def: 12, mp: 30, hp: 75, expNeed: 600 },
@@ -567,10 +439,8 @@ const HEART_ARTS = [
   { id: "xuemou_heart", name: "血魔真经", realm: 2, maxLvl: 5, type: "邪",
     category: "练体", element: "huo",
     baseLearn: 3,
-    fragments: [
-      { id: "xuemou_heart_f2", name: "血魔真经·下卷", start: 4, end: 5 },
-    ],
-    reqZheng: 0, reqXie: 60, reqRoot: 3, sect: "xuemou",
+    reqMorality: { max: 20 },
+    reqRoot: 3, sect: "xuemou",
     desc: "血魔宗镇派心法",
     levels: [
       { lvl: 1, power: 300, atk: 28, def: 5,  mp: 15, hp: 60, expNeed: 600 },
@@ -583,10 +453,7 @@ const HEART_ARTS = [
   { id: "leiyin_heart", name: "雷音大法", realm: 2, maxLvl: 5, type: "正",
     category: "练体", element: "lei",
     baseLearn: 3,
-    fragments: [
-      { id: "leiyin_heart_f2", name: "雷音大法·下卷", start: 4, end: 5 },
-    ],
-    reqZheng: 65, reqXie: 0, reqRoot: 4, sect: "leiyin",
+    reqRoot: 4, sect: "leiyin",
     desc: "雷音寺镇派大法",
     levels: [
       { lvl: 1, power: 275, atk: 22, def: 12, mp: 22, hp: 75, expNeed: 700 },
@@ -599,10 +466,7 @@ const HEART_ARTS = [
   { id: "youming_heart", name: "幽冥鬼典", realm: 2, maxLvl: 5, type: "邪",
     category: "练法", element: "shui",
     baseLearn: 3,
-    fragments: [
-      { id: "youming_heart_f2", name: "幽冥鬼典·下卷", start: 4, end: 5 },
-    ],
-    reqZheng: 0, reqXie: 60, reqRoot: 3, sect: "youming",
+    reqRoot: 3, sect: "youming",
     desc: "幽冥宗镇派鬼典",
     levels: [
       { lvl: 1, power: 290, atk: 26, def: 6,  mp: 20, hp: 65, expNeed: 600 },
@@ -615,10 +479,7 @@ const HEART_ARTS = [
   { id: "wanshou_heart", name: "万兽真经", realm: 2, maxLvl: 5, type: "中立",
     category: "练体", element: "tu",
     baseLearn: 3,
-    fragments: [
-      { id: "wanshou_heart_f2", name: "万兽真经·下卷", start: 4, end: 5 },
-    ],
-    reqZheng: 50, reqXie: 50, reqRoot: 3, sect: "wanshou",
+    reqRoot: 3, sect: "wanshou",
     desc: "万兽门镇派真经",
     levels: [
       { lvl: 1, power: 270, atk: 22, def: 10, mp: 20, hp: 85, expNeed: 600 },
@@ -631,10 +492,7 @@ const HEART_ARTS = [
   { id: "jianzhong_heart", name: "剑冢剑典", realm: 2, maxLvl: 5, type: "中立",
     category: "练法", element: "jin",
     baseLearn: 3,
-    fragments: [
-      { id: "jianzhong_heart_f2", name: "剑冢剑典·下卷", start: 4, end: 5 },
-    ],
-    reqZheng: 55, reqXie: 55, reqRoot: 4, sect: "jianzhong",
+    reqRoot: 4, sect: "jianzhong",
     desc: "剑冢镇派剑典",
     levels: [
       { lvl: 1, power: 310, atk: 30, def: 6,  mp: 18, hp: 65, expNeed: 700 },
@@ -647,11 +505,7 @@ const HEART_ARTS = [
   { id: "xingchen_heart", name: "星辰大法", realm: 3, maxLvl: 7, type: "正",
     category: "练法", element: "lei",
     baseLearn: 3,
-    fragments: [
-      { id: "xingchen_heart_f2", name: "星辰大法·中卷", start: 4, end: 6 },
-      { id: "xingchen_heart_f3", name: "星辰大法·下卷", start: 7, end: 7 },
-    ],
-    reqZheng: 70, reqXie: 0, reqRoot: 5, sect: "xingchen",
+    reqRoot: 5, sect: "xingchen",
     desc: "星辰阁镇派大法",
     levels: [
       { lvl: 1, power: 800,  atk: 60,  def: 35, mp: 65, hp: 220, expNeed: 2000 },
@@ -664,3 +518,22 @@ const HEART_ARTS = [
     ],
   },
 ];
+
+/* ============================================================
+   心法上卷（自动生成）
+   ============================================================ */
+
+/* 心法上卷（自动生成） */
+if (typeof ITEMS !== "undefined") {
+  HEART_ARTS.forEach(art => {
+    const isFull = (art.baseLearn === art.maxLvl);
+    ITEMS[art.id + "_f1"] = {
+      type: "heartFragment",
+      name: isFull ? art.name : (art.name + "·上卷"),
+      artId: art.id,
+      start: 1,
+      end: art.baseLearn || 3,
+      price: 100,
+    };
+  });
+}

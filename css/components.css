@@ -480,3 +480,144 @@ input, select, textarea {
     min-width: 80px;
   }
 }
+
+/* ===== 战斗全屏 ===== */
+.battle-screen {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #0a0806;
+  z-index: 1000;
+  flex-direction: column;
+  padding: 12px;
+  overflow-y: auto;
+}
+.battle-screen.show { display: flex; }
+
+.battle-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid #3a3020;
+  margin-bottom: 8px;
+}
+
+.battle-side { margin-bottom: 10px; }
+.battle-side h4 { color: #d8b878; margin: 4px 0; }
+
+.battle-unit {
+  border: 1px solid #3a3020;
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  background: #14100a;
+}
+.battle-unit.player { border-color: #7fbf5f; }
+.battle-unit.dead { opacity: 0.4; }
+
+.battle-log {
+  flex: 1;
+  min-height: 100px;
+  max-height: 180px;
+  overflow-y: auto;
+  border: 1px solid #2a2216;
+  border-radius: 4px;
+  padding: 6px;
+  font-size: 12px;
+  color: #c8b890;
+  margin: 8px 0;
+}
+
+.battle-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.battle-actions button {
+  flex: 1 1 30%;
+  padding: 10px;
+  background: #1a140e;
+  color: #e8c87a;
+  border: 1px solid #3a3020;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.battle-submenu {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 1100;
+  align-items: center;
+  justify-content: center;
+}
+.battle-submenu-box {
+  background: #14100a;
+  border: 1px solid #3a3020;
+  padding: 16px;
+  max-width: 400px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  border-radius: 6px;
+}
+.list-btn {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 6px;
+  text-align: left;
+  background: #1a140e;
+  color: #e8c87a;
+  border: 1px solid #3a3020;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.battle-result {
+  text-align: center;
+  padding: 40px 20px;
+}
+.battle-result h2 { color: #d8b878; margin-bottom: 16px; }
+.battle-result button {
+  padding: 10px 30px;
+  margin-top: 16px;
+  background: #2a2010;
+  color: #e8c87a;
+  border: 1px solid #5a4820;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.statuses { margin-left: 6px; }
+.status-icon {
+  display: inline-block;
+  font-size: 14px;
+  margin-right: 3px;
+  cursor: help;
+}
+
+
+/* ===== Status ===== */
+.statuses { margin-left: 6px; }
+.status-icon {
+  display: inline-block;
+  font-size: 14px;
+  margin-right: 3px;
+  cursor: help;
+}
+
+.pet-card {
+  border: 1px solid #3a3020;
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 6px;
+}
+
+
+.subtab.locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

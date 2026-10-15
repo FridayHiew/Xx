@@ -1,38 +1,201 @@
 /* ============================================================
-   data/recipes.js - 炼丹 / 突破道具 / 装备
+   data/recipes.js - 炼丹配方（59 丹方）
    ============================================================ */
 
-/* 炼丹配方 */
 const RECIPES = [
-  { id: "juqi",   name: "聚气丹", mat: { 灵草: 2, 泉水: 1 }, effect: "修炼+50%，持续3天", rate: 0.85 },
-  { id: "pojing", name: "破境丹", mat: { 灵草: 5, 妖丹: 1 }, effect: "突破率+15%", rate: 0.60 },
-  { id: "huixue", name: "回血丹", mat: { 灵草: 3 }, effect: "恢复50%气血", rate: 0.90 },
-  { id: "jingxin",name: "静心丹", mat: { 灵草: 2, 寒泉: 1 }, effect: "心情平复", rate: 0.75 },
-  { id: "yanshou",name: "延寿丹", mat: { 千年灵芝: 1, 妖丹: 2 }, effect: "寿元+50", rate: 0.40 },
+  /* ---------- 通用 / 基础（6） ---------- */
+  { id: "huixue",    name: "回血丹",     maxGrade: 5, rate: 0.90, realm: 1, price: 30,
+    mat: { 洗骨花: 3 },
+    desc: "恢复气血（品级越高效果越好）" },
+  { id: "huiling",   name: "回灵丹",     maxGrade: 5, rate: 0.88, realm: 1, price: 30,
+    mat: { 清泉水: 3, 草木灰: 2 },
+    desc: "恢复灵力" },
+  { id: "jiedu",     name: "解毒丹",     maxGrade: 5, rate: 0.90, realm: 1, price: 30,
+    mat: { 洗骨花: 2, 清泉水: 1 },
+    desc: "解除中毒" },
+  { id: "qingxin",   name: "清心丹",     maxGrade: 5, rate: 0.80, realm: 1, price: 30,
+    mat: { 洗骨花: 2, 清泉水: 2, 草木灰: 1 },
+    desc: "解除心魔 / 所有负面" },
+  { id: "liaoshang", name: "疗伤丹",     maxGrade: 5, rate: 0.85, realm: 1, price: 30,
+    mat: { 洗骨花: 3, 草木灰: 2 },
+    desc: "战后恢复气血" },
+  { id: "xuming",    name: "续命丹",     maxGrade: 9, rate: 0.40, realm: 2, price: 1500,
+    mat: { 千年降压草: 1, 妖兽精血: 1, 天地灵乳: 1 },
+    desc: "濒死保命" },
+
+  /* ---------- 练气期（5） ---------- */
+  { id: "juqi",      name: "聚气丹",     maxGrade: 9, rate: 0.85, realm: 1, price: 60,
+    mat: { 洗骨花: 3, 草木灰: 5, 清泉水: 1 },
+    desc: "+练气修为" },
+  { id: "xisui",     name: "洗髓丹",     maxGrade: 5, rate: 0.50, realm: 1, price: 120,
+    mat: { 洗骨花: 5, 玉髓芝: 1, 清泉水: 3 },
+    desc: "+1 灵根" },
+  { id: "huanglong", name: "黄龙丹",     maxGrade: 9, rate: 0.70, realm: 1, price: 120,
+    mat: { 洗骨花: 5, 草木灰: 8, 玉髓芝: 1 },
+    desc: "+练气修为（较多）" },
+  { id: "jinyuan",   name: "金元丹",     maxGrade: 7, rate: 0.65, realm: 1, price: 60,
+    mat: { 玉髓芝: 2, 清泉水: 3 },
+    desc: "突破小境界 +10%" },
+  { id: "pozhang",   name: "破障丹",     maxGrade: 7, rate: 0.60, realm: 1, price: 60,
+    mat: { 玉髓芝: 2, 紫猴花: 1, 清泉水: 3 },
+    desc: "突破率 +15%" },
+
+  /* ---------- 筑基期（5） ---------- */
+  { id: "zhuji",     name: "筑基丹",     maxGrade: 9, rate: 0.50, realm: 2, price: 250,
+    mat: { 玉髓芝: 1, 寒血果: 1, 紫猴花: 1, 水系妖丹: 1 },
+    desc: "突破率 +30%" },
+  { id: "zengyuan",  name: "增元丹",     maxGrade: 9, rate: 0.60, realm: 2, price: 250,
+    mat: { 寒血果: 2, 紫猴花: 2, 清泉水: 5 },
+    desc: "+筑基修为" },
+  { id: "dingshen",  name: "定神丹",     maxGrade: 7, rate: 0.65, realm: 2, price: 250,
+    mat: { 寒血果: 2, 紫猴花: 1, 千年降压草: 1 },
+    desc: "防走火入魔" },
+  { id: "xuemin",    name: "雪敏丹",     maxGrade: 7, rate: 0.70, realm: 2, price: 250,
+    mat: { 寒血果: 3, 清泉水: 3 },
+    desc: "战斗回复 30% 气血" },
+  { id: "jiangchen", name: "降尘丹",     maxGrade: 9, rate: 0.55, realm: 2, price: 250,
+    mat: { 玉髓芝: 3, 寒血果: 2, 水系妖丹: 1 },
+    desc: "辅助突破金丹" },
+
+  /* ---------- 金丹期（5） ---------- */
+  { id: "juning",    name: "聚凝丹",     maxGrade: 9, rate: 0.50, realm: 3, price: 500,
+    mat: { 千年降压草: 1, 火精枣: 3, 妖兽精血: 1 },
+    desc: "+金丹修为" },
+  { id: "jiejin",    name: "结金丹",     maxGrade: 9, rate: 0.30, realm: 3, price: 500,
+    mat: { 千年降压草: 1, 火精枣: 3, 妖兽精血: 1, 天地灵乳: 1 },
+    desc: "突破率 +15%" },
+  { id: "jiuzhuan",  name: "九转还魂丹", maxGrade: 9, rate: 0.15, realm: 3, price: 1500,
+    mat: { 千年降压草: 3, 妖兽精血: 3, 天地灵乳: 2, 火精枣: 5 },
+    desc: "复活（12 天冷却）" },
+  { id: "butian",    name: "补天丹",     maxGrade: 9, rate: 0.30, realm: 3, price: 500,
+    mat: { 千年降压草: 2, 天地灵乳: 1, 妖兽精血: 2 },
+    desc: "修复根基" },
+  { id: "peijin",    name: "培金丹",     maxGrade: 9, rate: 0.40, realm: 3, price: 500,
+    mat: { 千年降压草: 2, 火精枣: 5 },
+    desc: "稳固金丹" },
+
+  /* ---------- 突破辅助（4） ---------- */
+  { id: "pojing",    name: "破境丹",     maxGrade: 7, rate: 0.60, realm: 1, price: 120,
+    mat: { 玉髓芝: 2, 紫猴花: 1 },
+    desc: "突破率 +15%" },
+  { id: "ningyuan",  name: "凝元丹",     maxGrade: 7, rate: 0.65, realm: 1, price: 120,
+    mat: { 洗骨花: 5, 玉髓芝: 1 },
+    desc: "突破率 +10%（炼气）" },
+  { id: "guji",      name: "固基丹",     maxGrade: 7, rate: 0.55, realm: 2, price: 250,
+    mat: { 寒血果: 2, 玉髓芝: 2 },
+    desc: "突破率 +20%（筑基）" },
+  { id: "hudan",     name: "护丹丹",     maxGrade: 7, rate: 0.60, realm: 2, price: 250,
+    mat: { 紫猴花: 3, 寒血果: 2 },
+    desc: "突破失败熟练度仅 -15" },
+
+  /* ---------- 修炼加速（4） ---------- */
+  { id: "ningshen",  name: "凝神丹",     maxGrade: 7, rate: 0.70, realm: 1, price: 60,
+    mat: { 洗骨花: 3, 清泉水: 3 },
+    desc: "修炼 +50%，1 天" },
+  { id: "wudao",     name: "悟道丹",     maxGrade: 9, rate: 0.40, realm: 2, price: 500,
+    mat: { 紫猴花: 3, 玉髓芝: 2, 千年降压草: 1 },
+    desc: "修炼 +100%，1 天" },
+  { id: "juling",    name: "聚灵丹",     maxGrade: 5, rate: 0.50, realm: 2, price: 500,
+    mat: { 清泉水: 5, 玉髓芝: 2, 寒血果: 1 },
+    desc: "打坐额外 +1 行动" },
+  { id: "jingxin",   name: "静心丹",     maxGrade: 5, rate: 0.75, realm: 1, price: 60,
+    mat: { 洗骨花: 2, 清泉水: 2 },
+    desc: "心情 +1" },
+
+  /* ---------- 属性永久（6） ---------- */
+  { id: "cuiti",     name: "淬体丹",     maxGrade: 9, rate: 0.55, realm: 2, price: 250,
+    mat: { 寒血果: 3, 妖兽精血: 1, 清泉水: 5 },
+    desc: "气血上限 +50" },
+  { id: "duangu",    name: "锻骨丹",     maxGrade: 9, rate: 0.55, realm: 2, price: 250,
+    mat: { 水系妖丹: 2, 寒血果: 2, 紫猴花: 2 },
+    desc: "防御 +5" },
+  { id: "ruijin",    name: "锐金丹",     maxGrade: 9, rate: 0.55, realm: 2, price: 250,
+    mat: { 火精枣: 2, 妖兽精血: 1, 玉髓芝: 3 },
+    desc: "攻击 +5" },
+  { id: "qingshen",  name: "轻身丹",     maxGrade: 9, rate: 0.60, realm: 2, price: 250,
+    mat: { 紫猴花: 3, 清泉水: 5 },
+    desc: "速度 +3" },
+  { id: "yanshou",   name: "延寿丹",     maxGrade: 5, rate: 0.40, realm: 2, price: 250,
+    mat: { 千年降压草: 1, 玉髓芝: 3 },
+    desc: "寿元 +50" },
+  { id: "zhuyan",    name: "驻颜丹",     maxGrade: 5, rate: 0.50, realm: 2, price: 250,
+    mat: { 紫猴花: 3, 寒血果: 2, 清泉水: 5 },
+    desc: "外表不老" },
+
+  /* ---------- 社交 / 特殊（4） ---------- */
+  { id: "hehuan",    name: "合欢丹",     maxGrade: 5, rate: 0.55, realm: 1, price: 120,
+    mat: { 紫猴花: 3, 玉髓芝: 1 },
+    desc: "NPC 好感 +10（全体）" },
+  { id: "mihun",     name: "迷魂丹",     maxGrade: 7, rate: 0.50, realm: 1, price: 120,
+    mat: { 紫猴花: 3, 草木灰: 5 },
+    desc: "战斗眩晕敌人" },
+  { id: "shigu",     name: "蚀骨丹",     maxGrade: 7, rate: 0.50, realm: 1, price: 120,
+    mat: { 寒血果: 2, 草木灰: 5, 清泉水: 2 },
+    desc: "战斗中毒敌人" },
+  { id: "baoling",   name: "爆灵丹",     maxGrade: 7, rate: 0.45, realm: 2, price: 500,
+    mat: { 火精枣: 3, 玉髓芝: 2 },
+    desc: "法术威力 +50%，1 回合" },
+
+  /* ---------- 炼器 / 炼丹辅助（3） ---------- */
+  { id: "ninghuo",   name: "凝火丹",     maxGrade: 7, rate: 0.60, realm: 1, price: 120,
+    mat: { 火精枣: 2, 草木灰: 5 },
+    desc: "炼丹成功率 +20%，产出 +1" },
+  { id: "juhuo",     name: "聚火丹",     maxGrade: 7, rate: 0.60, realm: 1, price: 120,
+    mat: { 火精枣: 3, 草木灰: 3 },
+    desc: "炼器成功率 +20%" },
+  { id: "dinghun",   name: "定魂丹",     maxGrade: 7, rate: 0.55, realm: 2, price: 120,
+    mat: { 紫猴花: 2, 寒血果: 2, 玉髓芝: 1 },
+    desc: "炼器防炸炉" },
+
+  /* ---------- 邪道专属（3） ---------- */
+  { id: "xuesha",    name: "血煞丹",     maxGrade: 7, rate: 0.50, realm: 1, price: 250,
+    mat: { 妖兽精血: 2, 火精枣: 2 },
+    desc: "攻击 +30%（扣 10% 气血）" },
+  { id: "moyuan",    name: "魔元丹",     maxGrade: 7, rate: 0.50, realm: 2, price: 500,
+    mat: { 妖兽精血: 2, 千年降压草: 1 },
+    desc: "突破率 +25%，心情 -2" },
+  { id: "shihun",    name: "噬魂丹",     maxGrade: 7, rate: 0.45, realm: 2, price: 500,
+    mat: { 妖兽精血: 3, 千年降压草: 1, 天地灵乳: 1 },
+    desc: "击杀回血 20%" },
+
+  /* ---------- 灵兽特殊（8） ---------- */
+  { id: "lingshou_xisui",   name: "灵兽洗髓丹", maxGrade: 7, rate: 0.50, realm: 1, price: 200,
+    mat: { 妖兽精血: 2, 玉髓芝: 2 },
+    desc: "灵宠天赋重掷" },
+  { id: "lingshou_xuemai",  name: "灵兽血脉丹", maxGrade: 7, rate: 0.50, realm: 1, price: 200,
+    mat: { 妖兽精血: 3, 寒血果: 2 },
+    desc: "灵宠血脉重掷" },
+  { id: "lingshou_cuiti",   name: "灵兽淬体丹", maxGrade: 9, rate: 0.55, realm: 2, price: 200,
+    mat: { 妖兽精血: 2, 火精枣: 2 },
+    desc: "灵宠气血 +50" },
+  { id: "lingshou_duangu",  name: "灵兽锻骨丹", maxGrade: 9, rate: 0.55, realm: 2, price: 200,
+    mat: { 妖兽精血: 2, 水系妖丹: 2 },
+    desc: "灵宠防御 +5" },
+  { id: "lingshou_ruizhua", name: "灵兽锐爪丹", maxGrade: 9, rate: 0.55, realm: 2, price: 200,
+    mat: { 妖兽精血: 2, 火精枣: 2 },
+    desc: "灵宠攻击 +5" },
+  { id: "lingshou_qingshen",name: "灵兽轻身丹", maxGrade: 9, rate: 0.55, realm: 2, price: 200,
+    mat: { 妖兽精血: 2, 紫猴花: 3 },
+    desc: "灵宠速度 +3" },
+  { id: "lingshou_jingyan", name: "灵兽经验丹", maxGrade: 9, rate: 0.50, realm: 2, price: 200,
+    mat: { 妖兽精血: 3, 天地灵乳: 1 },
+    desc: "灵宠 +修为" },
+  { id: "lingshou_zhongcheng", name: "灵兽忠诚丹", maxGrade: 5, rate: 0.60, realm: 1, price: 200,
+    mat: { 妖兽精血: 2, 草木灰: 3 },
+    desc: "灵宠饥饿回满" },
 ];
 
-/* 突破道具 */
+/* ============================================================
+   工具函数
+   ============================================================ */
+
+function getRecipe(id) {
+  return RECIPES.find(r => r.id === id);
+}
+
+/* 兼容旧引用 */
 const BREAK_ITEMS = [
-  { id: "pojing", name: "破境丹", realmBonus: 0.15, desc: "突破成功率+15%" },
-  { id: "zhuji",  name: "筑基丹", realmBonus: 0.25, realmOnly: [1, 2], desc: "炼气→筑基、筑基→金丹 +25%" },
-  { id: "jindan", name: "金丹丹", realmBonus: 0.30, realmOnly: [2, 3], desc: "筑基→金丹、金丹→元婴 +30%" },
-];
-
-/* 装备 */
-const EQUIPS = [
-  { id: "e_sword1", name: "青锋剑",   slot: "weapon", atk: 5,  def: 0,  hp: 0,  mp: 0,  desc: "凡铁剑，聊胜于无" },
-  { id: "e_sword2", name: "玄铁重剑", slot: "weapon", atk: 12, def: 2,  hp: 0,  mp: 0,  desc: "玄铁打造，沉重" },
-  { id: "e_armor1", name: "布衣",     slot: "armor",  atk: 0,  def: 5,  hp: 20, mp: 0,  desc: "粗布衣" },
-  { id: "e_armor2", name: "皮甲",     slot: "armor",  atk: 0,  def: 10, hp: 40, mp: 0,  desc: "妖兽皮制" },
-  { id: "e_ring1",  name: "聚灵戒",   slot: "ring",   atk: 0,  def: 0,  hp: 0,  mp: 20, desc: "聚灵之戒" },
-  { id: "e_ring2",  name: "护心镜",   slot: "ring",   atk: 0,  def: 3,  hp: 30, mp: 0,  desc: "护心之镜" },
-
-
-  /* 晋升奖励装备 */
-  { id: "e_sword_promotion", name: "宗门制式剑", slot: "weapon", atk: 15, def: 2, hp: 0,  mp: 0,  desc: "宗门发的制式剑" },
-  { id: "e_robe_promotion",  name: "宗门道袍",   slot: "armor",  atk: 0,  def: 8, hp: 30, mp: 0,  desc: "宗门发的道袍" },
-  { id: "e_sword_mennei",    name: "精钢剑",     slot: "weapon", atk: 25, def: 5, hp: 0,  mp: 0,  desc: "门内弟子制式剑" },
-  { id: "e_robe_mennei",     name: "灵纹袍",     slot: "armor",  atk: 0,  def: 15,hp: 50, mp: 10, desc: "门内弟子道袍" },
-  { id: "e_sword_zhenchuan", name: "玄铁剑",     slot: "weapon", atk: 40, def: 10,hp: 0,  mp: 0,  desc: "真传弟子配剑" },
-  { id: "e_robe_zhenchuan",  name: "真传道袍",   slot: "armor",  atk: 0,  def: 25,hp: 80, mp: 20, desc: "真传弟子道袍" },
+  { id: "pojing",    name: "破境丹",     realmBonus: 0.15, desc: "突破成功率 +15%" },
+  { id: "zhuji",     name: "筑基丹",     realmBonus: 0.30, realmOnly: [1, 2], desc: "炼气→筑基、筑基→金丹 +30%" },
+  { id: "jiejin",    name: "结金丹",     realmBonus: 0.15, realmOnly: [2, 3], desc: "筑基→金丹、金丹→元婴 +15%" },
 ];

@@ -125,63 +125,6 @@ const SUNDAY_EVENTS = [
   { stage: "1004", text: "「若宗门能存，我死而无憾。」" },
 ];
 
-/* ========== 战斗敌人 ========== */
-const FIGHT_ENEMIES = {
-  normal: [
-    { name: "野狼",   hp: 60,  atk: 8,  def: 2,  exp: 30,  stone: 10 },
-    { name: "黑蛇",   hp: 80,  atk: 12, def: 4,  exp: 50,  stone: 15 },
-    { name: "山猪",   hp: 100, atk: 10, def: 6,  exp: 60,  stone: 20 },
-    { name: "毒蜂",   hp: 50,  atk: 15, def: 1,  exp: 40,  stone: 12 },
-  ],
-  elite: [
-    { name: "妖虎",   hp: 200, atk: 25, def: 10, exp: 150, stone: 60 },
-    { name: "灵狐",   hp: 180, atk: 30, def: 8,  exp: 160, stone: 70 },
-    { name: "血蝠",   hp: 220, atk: 28, def: 12, exp: 180, stone: 80 },
-  ],
-  boss: [
-    { name: "混沌兽", hp: 500, atk: 60, def: 25, exp: 600, stone: 300 },
-  ],
-};
-
-/* ========== 秘境事件 ========== */
-const SECRET_EVENTS = {
-  layer1: [
-    { type: "fight",  enemy: "normal", text: "一只野狼从树后跃出。" },
-    { type: "choice", text: "你在林间发现一株灵草。",
-      options: [
-        { label: "采摘", effect: { mat: { 灵草: 1 } } },
-        { label: "前进", effect: {} },
-      ] },
-    { type: "choice", text: "你看到一个宝箱。",
-      options: [
-        { label: "打开", effect: { random: true } },
-        { label: "前进", effect: {} },
-      ] },
-    { type: "fight",  enemy: "normal", text: "一只黑蛇挡住去路。" },
-    { type: "choice", text: "你看到一座石碑。",
-      options: [
-        { label: "参悟", effect: { dao: 1 } },
-        { label: "前进", effect: {} },
-      ] },
-  ],
-  layer2: [
-    { type: "fight",  enemy: "elite", text: "一只妖虎咆哮着扑来。" },
-    { type: "choice", text: "一个敌对修士挡住去路。",
-      options: [
-        { label: "战斗", effect: { fight: "elite" } },
-        { label: "交谈", effect: { talk: true } },
-        { label: "逃跑", effect: {} },
-      ] },
-    { type: "choice", text: "你看到一处上古遗迹。",
-      options: [
-        { label: "探索", effect: { random: true } },
-        { label: "前进", effect: {} },
-      ] },
-  ],
-  layer3: [
-    { type: "fight",  enemy: "boss", text: "混沌兽睁开眼睛。" },
-  ],
-};
 
 /* ========== 结局文本 ========== */
 const ENDING_TEXTS = {

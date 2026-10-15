@@ -73,19 +73,30 @@ function renderCultivatePage() {
   let primaryBtn = sliderHTML;
 
   if (art) {
-    if (prog.lvl === 0 && prog.proficiency >= 100 && !S.flags.breakAttemptedToday && check.ok) {
-      const rate = calcFanBreakRate();
-      primaryBtn += `<button class="primary block" onclick="tryBreak()">尝试突破（成功率 ${(rate * 100).toFixed(1)}%）</button>`;
-    } else if (prog.lvl > 0 && prog.lvl < art.maxLvl && prog.lvl < prog.maxLearn) {
-      const curLevelData = art.levels.find(l => l.lvl === prog.lvl);
-      if (curLevelData && prog.exp >= curLevelData.expNeed && prog.exp > 0) {
-        primaryBtn += `<button class="primary block" onclick="tryBreak()">突破到 Lv.${prog.lvl + 1}</button>`;
+    const isBP = isBreakPoint(prog.lvl);
+    const curLevelData = art.levels.find(l => l.lvl === prog.lvl);
+
+    if (isBP) {
+      /* 突破点：显示突破按钮 */
+      let ready = false;
+      if (prog.lvl === 0) ready = prog.proficiency >= 100;
+      else ready = curLevelData && prog.exp >= curLevelData.expNeed;
+
+      if (ready && !S.flags.breakAttemptedToday && check.ok) {
+        const rate = calcBreakRate();
+        const label = prog.lvl === 0 ? "尝试突破" : `突破到 Lv.${prog.lvl + 1}`;
+        primaryBtn += `<button class="primary block" onclick="tryBreak()">${label}（成功率 ${(rate * 100).toFixed(1)}%）</button>`;
+      }
+    } else {
+      /* 非突破点：修为满直接升 */
+      if (prog.lvl < art.maxLvl && prog.lvl < prog.maxLearn
+          && curLevelData && prog.exp >= curLevelData.expNeed) {
+        primaryBtn += `<button class="primary block" onclick="tryBreak()">提升到 Lv.${prog.lvl + 1}</button>`;
       }
     }
   }
 
-  const stoneCount = S.items["灵石"] || 0;
-
+  const stoneCount = S.inventory["灵石"] || 0;
   return `
     <h3>打坐修炼</h3>
     ${header}

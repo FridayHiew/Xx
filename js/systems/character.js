@@ -2,11 +2,28 @@
    systems/character.js - 角色创建 / 入门
    ============================================================ */
 
+const RANDOM_DAO_NAMES = [
+  "云逸", "长生", "青虚", "太玄", "问道", "灵素", "若尘", "凌霄",
+  "玄玑", "紫阳", "墨渊", "玉衡", "沧澜", "天枢", "玄真", "清微",
+  "丹青", "素心", "南华", "守拙", "无极", "知秋", "扶摇", "飞鸿"
+];
+
+function randomizeName() {
+  const input = document.getElementById("nameInput");
+  if (!input) return;
+  const picked = RANDOM_DAO_NAMES[Math.floor(Math.random() * RANDOM_DAO_NAMES.length)];
+  input.value = picked;
+}
+
 function createCharacter() {
   const name = (document.getElementById("nameInput").value || "无名").slice(0, 8);
   const gender = document.getElementById("genderInput").value;
   const month = parseInt(document.getElementById("monthInput").value) || 1;
   const day = parseInt(document.getElementById("dayInput").value) || 1;
+
+  if (window.xianxiaAudio && !window.xianxiaAudio.isPlaying) {
+    window.xianxiaAudio.play();
+  }
 
   const ie = ((month + day) % 2 === 0) ? "E" : "I";
   const luck = rndInt(0, 9);
@@ -134,7 +151,7 @@ function createCharacter() {
     meditateCount: 1,
   };
 
-  S.inventory["灵石"] = 10;
+  S.stone = 10; 
   S.inventory["e_armor1"] = 1;
 
   document.getElementById("creationPanel").style.display = "none";

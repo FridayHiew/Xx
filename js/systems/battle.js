@@ -10,7 +10,21 @@ let battle = null;
 
 function startBattle(enemyDefs) {
   const enemies = enemyDefs.map((def, i) => {
-    const base = def.enemyId ? getEnemyById(def.enemyId) : def;
+    /* ★ 支持自定义敌人（如榜单 NPC） */
+    let base = def.customEnemy || (def.enemyId ? getEnemyById(def.enemyId) : def);
+    if (!base) return null;
+
+    /* 如果没有 hp（榜单 NPC），按境界自动计算 */
+    if (!base.hp) {
+      base.hp = 80 + (base.sub || 1) * 25 + (base.realm || 0) * 100;
+      base.mp = 10 + (base.sub || 1) * 5;
+      base.atk = 6 + (base.sub || 1) * 3 + (base.realm || 0) * 5;
+      base.def = 2 + (base.sub || 1) * 1 + (base.realm || 0) * 3;
+      base.speed = 10 + (base.sub || 1);
+      base.exp = base.exp || (20 * (base.realm || 0) + 10 * (base.sub || 1));
+      base.stone = base.stone || (30 + 20 * (base.realm || 0));
+    }
+
     const scale = calcEnemyScale(base.realm || 0);
     return {
       id: "enemy_" + i,
@@ -28,7 +42,7 @@ function startBattle(enemyDefs) {
       speed: base.speed || 10,
       skills: base.skills || [],
       spells: base.spells || [],
-      items: Object.assign({}, base.items || {}),
+      items: buildEnemyItems(base.items || {}),
       skillLv: {},
       ai: base.ai || "simple",
       isBeast: !!base.isBeast,
@@ -233,11 +247,12 @@ function enemyTurn(u) {
 function chooseEnemyAction(u) {
   const hpRate = u.hp / u.hpMax;
 
-  /* 回血丹：带品级的，从 1 到 9 找有的 */
   if (hpRate < AI_CONFIG.healHpThreshold) {
-    for (let g = 1; g <= 9; g++) {
-      const id = "回血丹_" + g;
-      if (u.items[id] && u.items[id] > 0) {
+    /* 敌人用回春丹（任意阶任意品） */
+    for (const id in u.items) {
+      if (u.items[id] <= 0) continue;
+      const item = ITEMS[id];
+      if (item && item.type === "pill" && item.effect && item.effect.type === "heal") {
         return { type: "item", itemId: id };
       }
     }
@@ -314,7 +329,7 @@ function targetNeedsPick(targetType) {
 }
 
 /* ============================================================
-   有效属性（含逆天宝物破甲）
+   有效属性
    ============================================================ */
 
 function getEffectiveAtk(unit) {
@@ -326,7 +341,6 @@ function getEffectiveDef(target, attacker) {
   const mod = getStatusMod(target);
   let def = Math.max(0, Math.floor(target.def * (1 + mod.def)));
 
-  /* 玩家破甲 */
   if (attacker && attacker.isPlayer) {
     const hd = getCurrentHeavenDefyingEffect();
     if (hd && hd.armorPierce) def *= (1 - hd.armorPierce);
@@ -432,18 +446,16 @@ function doSkill(caster, skillId, pickedTargetId) {
 }
 
 /* ============================================================
-   使用道具（按 effect 分派）
+   使用道具
    ============================================================ */
 
 function doItem(u, itemId, targetId) {
   const item = ITEMS[itemId];
   if (!item || item.type !== "pill" || !item.effect) return;
 
-  /* ---------- 玩家 ---------- */
   if (u.isPlayer) {
     if (!hasItem(itemId)) return;
 
-    /* inflict 类型需要目标 */
     if (item.effect.type === "inflict") {
       let target;
       if (targetId) {
@@ -466,20 +478,15 @@ function doItem(u, itemId, targetId) {
     return;
   }
 
-  /* ---------- 敌人 / 灵宠 ---------- */
   if (!u.items[itemId] || u.items[itemId] <= 0) return;
 
-  if (item.effect.type === "inflict") {
-    /* 敌人一般不用 inflict，跳过 */
-    return;
-  }
+  if (item.effect.type === "inflict") return;
 
   applyPillEffect(item, u, true);
   u.items[itemId]--;
   if (u.items[itemId] <= 0) delete u.items[itemId];
 }
 
-/* 统一处理丹药效果（战斗内） */
 function applyPillEffect(item, unit, inBattle) {
   const e = item.effect;
   if (!e) return false;
@@ -525,7 +532,6 @@ function applyPillEffect(item, unit, inBattle) {
       return true;
     }
     case "survive": {
-      /* 续命丹：只做标记，真正触发在 applyDamage */
       if (!inBattle) return false;
       if (!unit._survive) unit._survive = [];
       unit._survive.push({ threshold: e.value || 0.3, used: false });
@@ -625,7 +631,6 @@ function getSpellBonusForUnit(u) {
 }
 
 function applyDamage(target, dmg) {
-  /* 续命丹：玩家血量将降到 0 以下时，保命 */
   if (target.isPlayer && target._survive && target._survive.length > 0) {
     const cur = target.hp;
     const after = cur - dmg;
@@ -731,10 +736,53 @@ function endBattle(result) {
 
     const deadPets = handlePetsAfterBattle(b.units, killed);
 
+    /* ★ 战利品掉落 */
+    const droppedItems = [];
+    killed.forEach(enemyUnit => {
+      const enemyDef = getEnemyById(enemyUnit.defId);
+      if (!enemyDef || !enemyDef.drops) return;
+      enemyDef.drops.forEach(drop => {
+        if (!chance(drop.chance || 1)) return;
+        if (drop.type === "mat") {
+          const grade = rndInt(drop.gradeRange[0], drop.gradeRange[1]);
+          const itemId = drop.baseId + "_" + grade;
+          addItem(itemId, drop.count);
+          droppedItems.push(`${drop.baseId}（${grade}品）×${drop.count}`);
+        } else if (drop.type === "stone") {
+          const amount = rndInt(drop.amount[0], drop.amount[1]);
+          S.stone += amount;
+          droppedItems.push(`灵石 +${amount}`);
+        } else if (drop.type === "item") {
+          addItem(drop.id, drop.count);
+          const name = ITEMS[drop.id] ? ITEMS[drop.id].name : drop.id;
+          droppedItems.push(`${name} ×${drop.count}`);
+        }
+      });
+    });
+
     if (result === "win") {
       logBattle(`战斗胜利！获得修为 ${totalExp}，灵石 ${totalStone}`);
+      if (droppedItems.length > 0) {
+        logBattle(`战利品：${droppedItems.join("、")}`);
+      }
+
+      /* ★ 榜单战斗胜利 */
+      if (S.flags.rankBattle && typeof handleRankBattleWin === "function") {
+        handleRankBattleWin();
+      }
+
+      /* ★ 小比战斗胜利 */
+      if (S.flags.competitionBattle && typeof handleCompetitionWin === "function") {
+        handleCompetitionWin();
+      }
+
     } else {
       logBattle(`收服成功！获得修为 ${totalExp}，灵石 ${totalStone}`);
+    }
+
+    /* ★ 如果是从冒险地进入的战斗，记录结果 */
+    if (S.flags && S.flags.adventureCombat) {
+      S.flags.adventureCombat.result = result;
     }
 
     clearBattleStatuses();
@@ -751,19 +799,83 @@ function endBattle(result) {
         ]);
       }, 500);
     }
+
   } else if (result === "lose") {
     handlePetsAfterBattle(b.units, []);
+    if (S.flags && S.flags.adventureCombat) {
+      S.flags.adventureCombat.result = "lose";
+    }
+
+    /* ★ 榜单战斗失败 */
+    if (S.flags.rankBattle && typeof handleRankBattleLose === "function") {
+      handleRankBattleLose();
+    }
+
+    /* ★ 小比战斗失败 */
+    if (S.flags.competitionBattle && typeof handleCompetitionLose === "function") {
+      handleCompetitionLose();
+    }
+
     clearBattleStatuses();
+
     battle = null;
     save();
     render();
     showBattleResult("lose");
+
+    /*
+       ★ 修复（P0-3）：
+       原代码战败只显示「战死」画面，不真正触发死亡，
+       玩家点「重开」只关掉界面，角色还活着。
+       改为：0.8 秒后调用 die()，由 die() 走真正的死亡流程
+       （内部会先 checkRevive()，有逆天宝物则免死）。
+    */
+    setTimeout(() => {
+      if (typeof die === "function") {
+        die("战斗失利，身死道消。");
+      }
+    }, 800);
+
   } else if (result === "flee") {
     handlePetsAfterBattle(b.units, []);
+    if (S.flags && S.flags.adventureCombat) {
+      S.flags.adventureCombat.result = "flee";
+    }
+
+    /*
+       ★ 修复（P1-4）：
+       小比中玩家逃跑时，原代码不调 handleCompetitionLose()，
+       导致 S.flags.competitionBattle 永远为 true，下次小比冲突。
+       这里补上：逃跑 = 放弃小比，按失败处理（结束本次小比）。
+    */
+    if (S.flags.rankBattle && typeof handleRankBattleLose === "function") {
+      handleRankBattleLose();
+    }
+    if (S.flags.competitionBattle && typeof handleCompetitionLose === "function") {
+      handleCompetitionLose();
+    }
+
     clearBattleStatuses();
     battle = null;
     save();
     render();
     showBattleResult("flee");
   }
+}
+
+/* 敌人道具：把模板 id 转成实际物品 id */
+function buildEnemyItems(templateItems) {
+  const result = {};
+  for (const key in templateItems) {
+    const val = templateItems[key];
+    /* 如果 key 已经是实际物品（含 "_1品" 等后缀），直接用 */
+    if (ITEMS[key]) {
+      result[key] = val;
+      continue;
+    }
+    /* 如果是模板 id（如 "回春丹_1阶"），按 1 品生成 */
+    const item = getOrCreatePillItem(key, 1);
+    if (item) result[item.id] = val;
+  }
+  return result;
 }

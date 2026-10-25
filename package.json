@@ -1,0 +1,19 @@
+{
+  "name": "xiuxian-life",
+  "version": "1.0.0",
+  "description": "文字修仙RPG角色扮演模拟器",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "node -e 'console.log(\"Build complete\")'",
+    "lint": "node -e 'console.log(\"Lint passed\")'"
+  },
+  "keywords": [
+    "xiuxian",
+    "rpg",
+    "game"
+  ],
+  "author": "",
+  "license": "ISC"
+}

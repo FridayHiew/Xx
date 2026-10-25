@@ -195,9 +195,8 @@ function debugAddRecipe() {
     return;
   }
 
-  /* 分页或全部列出：这里简单列全部 */
   const options = unknown.map(r => ({
-    label: `${r.name}（${r.maxGrade} 品）`,
+    label: `${r.name}（${r.tier} 阶）`,
     fn: () => {
       closeModal();
       if (!S.flags.knownRecipes) S.flags.knownRecipes = {};
@@ -207,7 +206,6 @@ function debugAddRecipe() {
     },
   }));
 
-  /* 全部解锁 */
   options.unshift({
     label: "★ 全部解锁 ★",
     fn: () => {
@@ -224,8 +222,15 @@ function debugAddRecipe() {
   showModal("加丹方 · 未解锁列表", `<p>共 ${unknown.length} 个未解锁：</p>`, options);
 }
 
+
 /* ========== 结局 ========== */
 
+/*
+   ★ 修复（P0-2）：
+   原 die() 死亡后调 save()，会把「已死角色」写回 localStorage。
+   如果玩家在死亡弹窗时刷新页面，boot() 会读到 hp=0 的存档，角色诈尸复活。
+   改为：删角色档 + 不 save() + 把 S 置空（防止 beforeunload 又 save）。
+*/
 function die(reason) {
   /* 逆天宝物：免死 */
   if (typeof checkRevive === "function" && checkRevive()) {
@@ -233,11 +238,25 @@ function die(reason) {
     return;
   }
 
-  showModal("身死道消", `<p>${reason}</p><p>道号：${S.name}　享年：${Math.floor(S.life)}岁</p>`, [
-    { label: "重开一生", fn: () => { closeModal(); resetGame(); } }
-  ]);
+  const name = S.name;
+  const life = Math.floor(S.life);
+
+  /* ① 删角色档：一命通关核心 */
+  try {
+    localStorage.removeItem(SAVE_KEY);
+  } catch (e) { /* ignore */ }
+
+  /* ② 先把 S 置空，再弹窗，防止 beforeunload 把死亡角色写回 */
   S.hp = 0;
-  save();
+  S = null;
+
+  /* ③ 弹死亡界面 */
+  showModal("身死道消", `
+    <p>${reason}</p>
+    <p>道号：${name}　享年：${life}岁</p>
+  `, [
+    { label: "重开一生", fn: () => { closeModal(); resetGame(); } },
+  ]);
 }
 
 function win() {
@@ -262,4 +281,11 @@ function debugAddHeavenDefying() {
   const disp = getHeavenDefyingDisplay(hd.id);
   log(`[DEBUG] 获得逆天宝物：${disp.name}`, "c-gold");
   save(); render();
+}
+
+function debugResetGame() {
+  showModal("确认清空数据重置", "<p>是否确定清空当前所有存档与游戏数据，并重新开辟道途？</p>", [
+    { label: "确定清空", fn: () => { closeModal(); resetGame(); } },
+    { label: "取消", fn: closeModal }
+  ]);
 }

@@ -120,7 +120,21 @@ function morningPrompt() {
   morningPrompted = true;
 
   const rank = S.flags.rank || "杂务";
-  const chores = rank === "杂务" ? CHORES_FAN : rank === "门外" ? CHORES_MENWAI : CHORES_MENNEI;
+  let chores;
+
+  if (rank === "杂务") chores = CHORES_FAN;
+  else if (rank === "门外") chores = CHORES_MENWAI;
+  else {
+    /* 门内/真传：按峰分配 */
+    chores = CHORES_MENNEI;
+    if (S.peak === "luoxia") chores = [CHORES_MENNEI.find(c => c.id === "lianyao")];       // 落霞峰-炼丹
+    else if (S.peak === "wenjian") chores = [CHORES_MENNEI.find(c => c.id === "lianqi")];   // 问剑峰-炼器
+    else if (S.peak === "wangyue") chores = [CHORES_MENNEI.find(c => c.id === "zhenfa")];   // 望月峰-阵法
+    else if (S.peak === "tingtao") chores = [CHORES_MENNEI.find(c => c.id === "xunshou")];  // 听涛峰-御兽
+    else chores = CHORES_MENNEI;
+    chores = chores.filter(Boolean);
+  }
+
   const chore = pick(chores);
 
   let giver;
@@ -227,7 +241,25 @@ function eatDinner(free) {
   });
 }
 
+/*
+   ★ 辟谷丹修复：辟谷期间无饥饿惩罚
+*/
 function skipDinner() {
+  /* 辟谷丹生效：不扣心情，不累加饥饿天数 */
+  if (S.flags.fastingDays && S.flags.fastingDays > 0) {
+    S.flags.fastingDays--;
+    log(`【辟谷】辟谷中，无饥饿惩罚（剩余 ${S.flags.fastingDays} 天）。`, "c-good");
+    closeModal();
+    showActionModal("辟谷", [
+      `辟谷中，无饥饿惩罚`,
+      `剩余 ${S.flags.fastingDays} 天`,
+    ], () => {
+      save(); render();
+      setTimeout(() => hobbyPrompt(), 300);
+    });
+    return;
+  }
+
   S.mood = Math.max(-2, S.mood - 1);
   S.flags.hungerStreak = (S.flags.hungerStreak || 0) + 1;
   log(`你饿着肚子回到屋里。心情-1（连续 ${S.flags.hungerStreak} 天）`, "c-bad");

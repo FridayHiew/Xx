@@ -18,6 +18,12 @@ function totalAtk() {
   }
   a += getHeartBonus().atk;
 
+  /* ★ 词条加成 */
+  if (typeof getAffixBonuses === "function") {
+    const ab = getAffixBonuses();
+    a += ab.atk;
+  }
+
   /* 逆天宝物 */
   const hd = getCurrentHeavenDefyingEffect();
   if (hd) {
@@ -45,6 +51,12 @@ function totalDef() {
   }
   d += getHeartBonus().def;
 
+    /* ★ 词条加成 */
+  if (typeof getAffixBonuses === "function") {
+    const ab = getAffixBonuses();
+    d += ab.def;
+  }
+
   const hd = getCurrentHeavenDefyingEffect();
   if (hd && hd.defMul) d *= (1 + hd.defMul);
 
@@ -53,6 +65,12 @@ function totalDef() {
 
 function getCritRate() {
   let rate = 0.05 + (totalLuck() || 0) * 0.01;
+
+  /* ★ 词条加成 */
+  if (typeof getAffixBonuses === "function") {
+    rate += getAffixBonuses().critRate / 100;
+  }
+
   const hd = getCurrentHeavenDefyingEffect();
   if (hd && hd.critRate) rate += hd.critRate;
   return Math.min(0.5, rate);
@@ -74,14 +92,32 @@ function totalSpeed() {
 
 function totalMaxHp() {
   let hp = S.hpMax + getHeartBonus().hp;
+
+  /* ★ 词条加成 */
+  if (typeof getAffixBonuses === "function") {
+    hp += getAffixBonuses().hpMax;
+  }
+
   const hd = getCurrentHeavenDefyingEffect();
   if (hd && hd.hpMul) hp *= (1 + hd.hpMul);
   return Math.floor(hp);
 }
+
 function totalMaxMp() {
+  const info = getPlayerRealmInfo();
+  /* 凡人境界灵力上限为 0 */
+  if (info.realm === 0) return 0;
+
   let mp = S.mpMax + getHeartBonus().mp;
+  
+  /* ★ 词条加成 */
+  if (typeof getAffixBonuses === "function") {
+    mp += getAffixBonuses().mpMax;
+  }
+  
   const hd = getCurrentHeavenDefyingEffect();
   if (hd && hd.mpMul) mp *= (1 + hd.mpMul);
+  
   return Math.floor(mp);
 }
 
@@ -154,22 +190,29 @@ function doCultivate(count) {
     prog.proficiency = Math.min(100, prog.proficiency + inc);
     totalHeart += inc;
 
-    if (prog.proficiency >= 100) {
-      const curLevelData = art.levels.find(l => l.lvl === prog.lvl);
 
-      if (prog.lvl === 0) {
-        /* Lv.0：不涨修为，等突破 */
-      } else if (prog.lvl >= prog.maxLearn) {
-        fragmentStop = true;
-      } else if (curLevelData && prog.lvl < art.maxLvl) {
-        const expGain = 10 * rr * realmBonus * pillBuffMul * rnd(0.9, 1.1);
-        prog.exp += expGain;
-        totalExp += expGain;
-        if (prog.exp >= curLevelData.expNeed) {
-          prog.exp = Math.min(prog.exp, curLevelData.expNeed);
+        if (prog.proficiency >= 100) {
+          const curLevelData = art.levels.find(l => l.lvl === prog.lvl);
+
+          if (prog.lvl === 0) {
+            /* Lv.0：不涨修为，等突破 */
+          } else if (curLevelData && prog.lvl < art.maxLvl) {
+            /* ★ 允许在当前等级内把修为涨满 */
+            if (prog.exp < curLevelData.expNeed) {
+              const expGain = 10 * rr * realmBonus * pillBuffMul * rnd(0.9, 1.1);
+              prog.exp += expGain;
+              totalExp += expGain;
+              if (prog.exp >= curLevelData.expNeed) {
+                prog.exp = curLevelData.expNeed;
+              }
+            } else {
+              /* 修为已满，且遇到了残卷上限 */
+              if (prog.lvl >= prog.maxLearn) {
+                fragmentStop = true;
+              }
+            }
+          }
         }
-      }
-    }
 
     S.actionsUsed++;
   }
@@ -200,6 +243,9 @@ function doCultivate(count) {
     log(`【时间】进入${HOURS[S.hour]}。`, "c-blue");
     if (S.hour === 2) setTimeout(() => { nightPrompt(); }, 300);
   }
+  /* ★ 打坐结束，气血灵力回满 */
+  S.hp = totalMaxHp();
+  S.mp = totalMaxMp();
 
   save(); render();
   showActionModal("打坐修炼", detail);
@@ -230,22 +276,21 @@ function recalcPlayerStats() {
 function cultivateWithStoneItem() {
   const info = getPlayerRealmInfo();
   if (info.realm === 0) { log("凡人阶段无法使用灵石辅助。", "c-bad"); return; }
-  const stoneCount = S.inventory["灵石"] || 0;
-  if (stoneCount < 1) { log("背包中没有灵石。", "c-bad"); return; }
+  if (S.stone < 1) { log("灵石不足。", "c-bad"); return; }
   if (S.actionsUsed >= ACTIONS_PER_SLOT) { log("本时段行动已用完。", "c-bad"); return; }
 
   const check = canCultivateHeart();
   if (!check.ok) { log(`无法修炼：【${check.reason}】`, "c-bad"); return; }
 
   S.actionsUsed++;
-  removeItem("灵石", 1);
+  S.stone -= 1;
 
   const art = getCurrentArt();
   const prog = getArtProgress(art.id);
 
   if (prog.proficiency < 100) {
     log("熟练度未满 100，灵石修炼无效。", "c-bad");
-    addItem("灵石", 1);
+    S.stone += 1;
     S.actionsUsed--;
     return;
   }
@@ -258,7 +303,7 @@ function cultivateWithStoneItem() {
     log(`使用灵石修炼，修为 +${fmt(gain)}。`, "c-gold");
   } else {
     log("当前心法无法通过灵石提升。", "c-bad");
-    addItem("灵石", 1);
+    S.stone += 1;
     S.actionsUsed--;
     return;
   }
@@ -303,10 +348,22 @@ function calcBreakRate() {
   return Math.max(0.05, Math.min(0.99, rate));
 }
 
+
 function tryBreak() {
   const art = getCurrentArt();
   if (!art) { log("没有心法。", "c-bad"); return; }
   const prog = getArtProgress(art.id);
+
+  /* ★ 新增：残卷上限判断 */
+  if (prog.lvl >= prog.maxLearn) {
+    log(`【${art.name}】已达当前残卷上限 Lv.${prog.maxLearn}，请先寻得后续残卷。`, "c-bad");
+    return;
+  }
+
+  if (S.poison >= 100) {
+  log("丹毒已满，境界永久锁定，无法突破。", "c-bad");
+  return;
+  }
 
   if (!isBreakPoint(prog.lvl)) {
     if (prog.lvl >= art.maxLvl) {
@@ -401,7 +458,18 @@ function doBreakAttempt(rate) {
     }
   };
 
+    /* 排毒：小境界 1~3，大境界 5~12 */
+  const isBigBreak = (prog.lvl === 1);   // 大境界 = lvl 0→1
+  const poisonReduce = isBigBreak ? rndInt(5, 12) : rndInt(1, 3);
+  if (S.poison > 0) {
+    S.poison = Math.max(0, S.poison - poisonReduce);
+    detail.push(`丹毒 -${poisonReduce}（当前 ${S.poison.toFixed(2)}）`);
+  }
+
   if (Math.random() < rate) {
+    /* ★ 记录突破前等级，用于判断大/小境界 */
+    const lvlBefore = prog.lvl;
+
     prog.lvl += 1;
     prog.exp = 0;
     if (isLv0) prog.proficiency = 100;
@@ -409,16 +477,38 @@ function doBreakAttempt(rate) {
     recalcPlayerStats();
     updateElementLvl();
 
+    /* ★ 排毒：大境界 5~12，小境界 1~3 */
+    const isBigBreak = (lvlBefore === 0);
+    const poisonReduce = isBigBreak ? rndInt(5, 12) : rndInt(1, 3);
+    let poisonDetail = "";
+    if (S.poison > 0) {
+      const beforePoison = S.poison;
+      S.poison = Math.max(0, S.poison - poisonReduce);
+      const actualReduce = beforePoison - S.poison;
+      poisonDetail = `丹毒 -${actualReduce.toFixed(2)}（当前 ${S.poison.toFixed(2)}/100）`;
+    }
+    
     const info = getPlayerRealmInfo();
     const realmName = info.realm === 0 ? "凡人" : `${REALMS[info.realm].name}·${subName(info.lvl)}${info.lvl}重`;
 
     log(`【突破成功】${art.name} 达到 Lv.${prog.lvl}，境界：${realmName}`, "c-gold");
+    
+    // 突破视觉光效
+    const fx = document.createElement("div");
+    fx.className = "breakthrough-fx";
+    document.body.appendChild(fx);
+    document.body.classList.add("shake-animation");
+    setTimeout(() => {
+        fx.remove();
+        document.body.classList.remove("shake-animation");
+    }, 1200);
+
     S.mood = Math.min(2, S.mood + 1);
 
     if (isLv0) {
       S.hp = totalMaxHp();
       S.mp = totalMaxMp();
-      if (info.realm > 0) S.lifeMax = REALMS[info.realm].life;
+      if (isLv0 && info.realm > 0) S.lifeMax = REALMS[info.realm].life;
     }
 
     /* 清除丹药加成 */
@@ -432,7 +522,8 @@ function doBreakAttempt(rate) {
       `心法《${art.name}》达到 Lv.${prog.lvl}`,
       `境界：${realmName}`,
       "心情 +1",
-    ]);
+      poisonDetail,   // 有排毒时才显示
+    ].filter(Boolean));
   } else {
     if (isLv0) prog.proficiency = Math.max(0, prog.proficiency - 30);
     else prog.exp = Math.max(0, Math.floor(prog.exp * 0.5));

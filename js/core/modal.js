@@ -8,7 +8,14 @@ function showModal(title, body, actions) {
      <div class="actions">${actions.map((a, i) =>
        `<button onclick="modalAction(${i})">${a.label}</button>`).join("")}</div>`;
   window._modalActions = actions;
-  document.getElementById("modalMask").classList.add("show");
+  const mask = document.getElementById("modalMask");
+  if (mask) {
+    /* ★ 如果 Admin 面板打开，弹窗 z-index 更高 */
+    const adminEl = document.getElementById("adminScreen");
+    const adminOpen = adminEl && adminEl.style.display !== "none";
+    mask.style.zIndex = adminOpen ? "10000" : "9999";
+    mask.classList.add("show");
+  }
 }
 
 function modalAction(i) {

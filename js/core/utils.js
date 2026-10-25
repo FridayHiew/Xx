@@ -244,8 +244,7 @@ function canLearnArt(artId) {
     return { ok: false, reason: "需炼气期以上" };
   }
 
-  /* 悟性 */
-   /* 本心 */
+  /* 本心 */
   if (!checkMorality(art)) {
     return { ok: false, reason: `本心不足（${moralityReqText(art)}）` };
   }
@@ -362,11 +361,18 @@ function getFragmentById(fragId) {
   };
 }
 
-/* 按 id 查找装备（普通/法宝/逆天宝物） */
+/*
+   ★ A-4：findEquipById 改为直查 ITEMS[id]
+   原来用 EQUIPS / ARTIFACTS 两个加载时快照，会与运行时追加（如炼器）不同步。
+   直查 ITEMS 是唯一真相源。
+*/
 function findEquipById(id) {
-  return EQUIPS.find(x => x.id === id)
-      || ARTIFACTS.find(x => x.id === id)
-      || HEAVEN_DEFYING.find(x => x.id === id);
+  const eq = ITEMS[id];
+  if (eq && (eq.type === "equip" || eq.type === "artifact")) return eq;
+  if (typeof HEAVEN_DEFYING !== "undefined") {
+    return HEAVEN_DEFYING.find(x => x.id === id) || null;
+  }
+  return null;
 }
 
 

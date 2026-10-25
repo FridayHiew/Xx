@@ -95,6 +95,7 @@ function checkUnionCompetition() {
 }
 
 /* 秘境（1003 年 10 月 1 日） */
+
 function checkSecretRealm() {
   const d = getDateInfo();
   if (d.year !== 1003 || d.month !== 10 || d.day !== 1) return;
@@ -109,16 +110,11 @@ function checkSecretRealm() {
       <p>「门内以上弟子可前往探索。」</p>
       <p class="small">你资格不够。</p>
     `, [{ label: "继续", fn: closeModal }]);
-  } else {
-    showModal("秘境 · 通知", `
-      <p>10 月 1 日，宗门大殿。</p>
-      <p>长老：「秘境入口已经开启。」</p>
-      <p>「门内以上弟子可前往探索。」</p>
-      <p class="small">据说，里面有上古宝物……</p>
-    `, [
-      { label: "前往秘境", fn: () => { closeModal(); enterSecretRealm(); } },
-      { label: "不去", fn: closeModal },
-    ]);
+    return;
+  }
+
+  if (typeof triggerStorySecretRealm === "function") {
+    triggerStorySecretRealm();
   }
 }
 

@@ -1,53 +1,67 @@
 /* ============================================================
-   theme.css - CSS 变量
+   theme.css - 仙侠国风主题变量与字体规范
    ============================================================ */
 
 :root {
-  /* 背景 */
-  --bg-dark:       #0a0906;
-  --bg-panel:      #14110c;
-  --bg-card:       #1a1610;
-  --bg-dark2:      #060504;
+  /* 背景层次：墨色、玄黑、紫檀、茶晶 */
+  --bg-dark:       #080705;
+  --bg-dark2:      #050403;
+  --bg-panel:      #120e0a;
+  --bg-card:       #19140e;
+  --bg-elevated:   #211a12;
+  --bg-glass:      rgba(18, 14, 10, 0.85);
 
-  /* 边框 */
-  --border-main:   #3a3020;
-  --border-soft:   #2a2216;
-  --border-gold:   #6a4a1a;
-  --border-strong: #5a4a2a;
+  /* 边框：古铜、鎏金、朱砂、玄铁 */
+  --border-main:   #3d2e1b;
+  --border-soft:   #291f13;
+  --border-gold:   #8a652a;
+  --border-gold-bright: #d4a347;
+  --border-strong: #614924;
 
-  /* 文字 */
-  --text-main:     #c8b898;
-  --text-dim:      #8a7a5a;
-  --text-gold:     #e8c87a;
-  --text-gold2:    #d8b878;
-  --text-muted:    #6a5a4a;
-  --text-bright:   #f0dca8;
+  /* 文字：云锦金、牙白、枯茶、流光金 */
+  --text-main:     #cfc2a5;
+  --text-dim:      #8c7c5e;
+  --text-gold:     #f2cf7e;
+  --text-gold2:    #e0ba6c;
+  --text-muted:    #695944;
+  --text-bright:   #fff1cf;
 
-  /* 状态色 */
+  /* 灵韵与品质五行色 */
   --c-normal:      #b8a888;
-  --c-good:        #7fbf5f;
-  --c-bad:         #d05a4a;
-  --c-gold:        #e8c87a;
-  --c-purple:      #b088d8;
-  --c-blue:        #6aa8d8;
-  --c-pink:        #d888a8;
+  --c-good:        #5fb865;
+  --c-bad:         #db4c3b;
+  --c-gold:        #f0ce78;
+  --c-purple:      #b88ce8;
+  --c-blue:        #5da8eb;
+  --c-pink:        #e884a6;
+  --c-cyan:        #4fd1c5;
 
-  /* 气血/灵力 */
-  --hp-from:       #5a1a1a;
-  --hp-to:         #d05a4a;
-  --mp-from:       #1a3a5a;
-  --mp-to:         #6aa8d8;
+  /* 气血 (生机赤金) / 灵力 (浩瀚玄幽) */
+  --hp-from:       #7a1818;
+  --hp-to:         #e64c38;
+  --mp-from:       #133863;
+  --mp-to:         #3b8deb;
+  --exp-from:      #6b4912;
+  --exp-to:        #e0a82b;
 
-  /* 时段 */
-  --hour-morning:  #e8c87a;
-  --hour-noon:     #d0a050;
-  --hour-night:    #6aa8d8;
+  /* 时段天光 */
+  --hour-morning:  #f0cf7a;
+  --hour-noon:     #e69a38;
+  --hour-night:    #6daee6;
 
-  /* 圆角 */
-  --radius-sm:     4px;
-  --radius-md:     6px;
-  --radius-lg:     8px;
+  /* 尺寸圆角 */
+  --radius-xs:     3px;
+  --radius-sm:     5px;
+  --radius-md:     8px;
+  --radius-lg:     12px;
+  --radius-xl:     16px;
 
-  /* 阴影 */
-  --shadow-gold:   0 0 40px rgba(232, 200, 122, 0.15);
+  /* 仙侠专属光晕 */
+  --shadow-gold:   0 0 25px rgba(242, 207, 126, 0.18);
+  --shadow-card:   0 6px 18px rgba(0, 0, 0, 0.65);
+  --shadow-btn:    0 3px 8px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 230, 160, 0.15);
+
+  /* 字体族群：优先高雅典雅宋体/衬线，保留无衬线现代清晰度 */
+  --font-serif:    "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", "STSong", serif;
+  --font-sans:     -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
 }

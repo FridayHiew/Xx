@@ -1,25 +1,5 @@
 /* ============================================================
    data/fight-enemies.js - 敌人数据
-   
-   敌人和玩家一样，是完整单位。
-   字段：
-   - id / name
-   - realm / sub: 境界（0=凡人, 1=炼气...）
-   - hp / mp: 基础值，会按玩家境界缩放
-   - atk / def / speed
-   - skills: 会的技能 id
-   - spells: 会的法术 id
-   - items: 带的道具 { "回血丹": 2 }
-   - ai: "simple" / "aggressive" / "defensive"
-   - isBeast: 是否妖兽（可收服）
-   - tameRate: 收服率
-   - canFlee: 是否能逃跑
-   - fleeRate: 逃跑率
-   - exp / stone: 战利品
-   - drop: 掉落物（可选）
-   ============================================================ */
-/* ============================================================
-   data/fight-enemies.js - 敌人数据
    ============================================================ */
 
 const FIGHT_ENEMIES = {
@@ -99,7 +79,8 @@ const FIGHT_ENEMIES = {
   boss: [
     { id: "e_chaos", name: "混沌兽", realm: 2, sub: 5,
       hp: 500, mp: 100, atk: 60, def: 25, speed: 18,
-      skills: ["sk_sword2", "sk_blade2"], spells: ["huojian"], items: { "回血丹": 2 },
+      skills: ["sk_sword2", "sk_blade2"], spells: ["huojian"],
+      items: { "回春丹_1阶_1品": 2 },
       resistances: { poison: 50, burn: 50, bleed: 50, stun: 60 },
       ai: "simple",
       isBeast: true, tameRate: 0.02,

@@ -1,48 +1,133 @@
 /* ============================================================
-   layout.css - 布局
+   layout.css - 仙侠布局系统
    ============================================================ */
 
-#app {
-  max-width: 720px;
-  margin: 0 auto;
+body {
+  background-color: var(--bg-dark);
+  background-image: 
+    radial-gradient(ellipse at 50% 0%, rgba(55, 38, 20, 0.4) 0%, transparent 70%),
+    radial-gradient(circle at 80% 30%, rgba(20, 30, 48, 0.3) 0%, transparent 60%);
+  background-attachment: fixed;
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ========== 顶栏 ========== */
+#app {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 10px 12px 30px;
+  box-sizing: border-box;
+}
+
+/* ========== 顶栏与仙境画卷 ========== */
+.top-hero-banner {
+  position: relative;
+  width: 100%;
+  height: 120px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 8px;
+  border: 1px solid var(--border-gold);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7), 0 0 15px rgba(138, 101, 42, 0.2);
+}
+
+.top-hero-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  filter: brightness(0.78) contrast(1.1);
+  transform: scale(1.02);
+  transition: transform 6s ease;
+}
+
+.top-hero-banner:hover img {
+  transform: scale(1.06);
+}
+
+.top-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 8, 6, 0.45) 0%,
+    rgba(18, 14, 10, 0.7) 60%,
+    rgba(10, 8, 6, 0.95) 100%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 8px 12px;
+}
+
 .top-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 4px;
-  gap: 6px;
+  gap: 10px;
+  width: 100%;
+}
+
+.top-title-wrap {
+  flex: 1;
+  text-align: center;
 }
 
 .top-bar h1 {
-  letter-spacing: 4px;
-  font-size: 17px;
-  flex: 1;
-  text-align: center;
+  font-family: var(--font-serif);
+  letter-spacing: 6px;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
   color: var(--text-gold);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9), 0 0 16px rgba(242, 207, 126, 0.5);
 }
 
+.top-subtext {
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  margin-top: 2px;
+  font-family: var(--font-serif);
+}
+
+.top-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 顶部操作圆形按钮 */
 .icon-btn {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #3a2e1c, #1a1610);
-  border: 2px solid var(--border-gold);
+  background: radial-gradient(circle at 35% 35%, #382c1a, #18130c);
+  border: 1.5px solid var(--border-gold);
   color: var(--text-gold);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 0 8px rgba(232, 200, 122, 0.3);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5), 0 0 8px rgba(212, 163, 71, 0.25);
   flex-shrink: 0;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.icon-btn:hover {
+  border-color: var(--border-gold-bright);
+  box-shadow: 0 0 12px rgba(242, 207, 126, 0.45);
+  transform: translateY(-1px);
 }
 
 .icon-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.94);
 }
 
 .icon-btn.log-icon {
@@ -51,78 +136,182 @@
 
 .icon-btn.log-icon .badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  background: var(--c-bad);
+  top: -3px;
+  right: -3px;
+  background: linear-gradient(135deg, #e64c38, #a81c1c);
   color: #fff;
   font-size: 10px;
-  border-radius: 8px;
-  padding: 0 5px;
+  font-weight: bold;
+  border-radius: 10px;
+  padding: 1px 5px;
   min-width: 16px;
   text-align: center;
   display: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .icon-btn.log-icon.has-new .badge {
   display: block;
 }
 
-/* ========== 状态栏 ========== */
+/* ========== 角色状态神阁 (Status Bar) ========== */
 .status-bar {
-  background: linear-gradient(180deg, var(--bg-card), var(--bg-panel));
+  background: linear-gradient(180deg, #1b150f 0%, #120e0a 100%);
   border: 1px solid var(--border-main);
+  border-top: 2px solid var(--border-gold);
   border-radius: var(--radius-md);
-  padding: 6px 8px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 3px 8px;
-  font-size: 12px;
-  margin-bottom: 6px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow-card);
+  position: relative;
 }
 
-.status-bar > span {
+.status-bar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(242, 207, 126, 0.6), transparent);
+}
+
+.status-hero-row {
   display: flex;
+  align-items: center;
   justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-soft);
+  margin-bottom: 8px;
 }
 
-.status-bar b {
+.status-avatar-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-avatar-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--border-gold-bright);
+  box-shadow: 0 0 10px rgba(242, 207, 126, 0.4);
+  background: #14110c;
+  flex-shrink: 0;
+}
+
+.status-avatar-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.status-name-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.status-name-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-name-line .player-name {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-bright);
+  letter-spacing: 1px;
+}
+
+.status-realm-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: var(--radius-xs);
+  background: linear-gradient(135deg, #3d2b14, #261a0b);
+  border: 1px solid var(--border-gold);
   color: var(--text-gold);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.status-sub-meta {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 2px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.status-sub-meta span {
+  color: var(--text-main);
+}
+
+/* 气血与灵力槽 */
+.gauge-cluster {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
 }
 
 .bar-row {
-  grid-column: 1 / -1;
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
+  gap: 8px;
+  font-size: 12px;
 }
 
 .bar-row .label {
-  width: 60px;
+  width: 42px;
   color: var(--text-dim);
+  font-weight: 600;
+  text-align: right;
+  flex-shrink: 0;
+  font-size: 11px;
 }
 
 .bar-wrap {
   flex: 1;
-  height: 10px;
-  background: #221c12;
-  border: 1px solid var(--border-main);
-  border-radius: 5px;
+  height: 14px;
+  background: #100d09;
+  border: 1px solid #332515;
+  border-radius: 7px;
   overflow: hidden;
   position: relative;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .bar-fill {
   height: 100%;
-  transition: width 0.3s;
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.bar-fill::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, transparent 100%);
 }
 
 .bar-hp {
   background: linear-gradient(90deg, var(--hp-from), var(--hp-to));
+  box-shadow: 0 0 10px rgba(230, 76, 56, 0.5);
 }
 
 .bar-mp {
   background: linear-gradient(90deg, var(--mp-from), var(--mp-to));
+  box-shadow: 0 0 10px rgba(59, 141, 235, 0.5);
 }
 
 .bar-text {
@@ -130,114 +319,268 @@
   top: 0;
   left: 0;
   right: 0;
-  text-align: center;
-  font-size: 9px;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
   color: #fff;
-  line-height: 10px;
-  text-shadow: 0 0 3px #000;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
+  font-variant-numeric: tabular-nums;
 }
 
-/* ========== Tab ========== */
-.tabs {
+/* 状态数据网格 */
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--border-soft);
+  font-size: 12px;
+}
+
+.status-grid-item {
   display: flex;
-  flex-wrap: wrap;
-  gap: 3px;
-  margin-bottom: 6px;
+  flex-direction: column;
+  background: rgba(14, 11, 8, 0.6);
+  padding: 4px 6px;
+  border-radius: var(--radius-xs);
+  border: 1px solid #241c12;
+}
+
+.status-grid-item .k {
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.status-grid-item .v {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-gold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+/* 节日庆典条 */
+.festival-banner {
+  grid-column: 1 / -1;
+  background: linear-gradient(90deg, #382410, #24180c);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-xs);
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+
+/* ========== 主导航 Tab 栏 ========== */
+/* ★ A-4：从固定 4 列改为 auto-fit，加第 5 个 Tab 时自动适配 */
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  gap: 6px;
+  margin-bottom: 8px;
 }
 
 .tab {
-  flex: 1 1 auto;
-  padding: 8px 6px;
-  background: var(--bg-card);
+  padding: 10px 4px;
+  background: linear-gradient(180deg, #1d1710 0%, #14100b 100%);
   border: 1px solid var(--border-main);
   color: #a89878;
   cursor: pointer;
   border-radius: var(--radius-sm);
   font-size: 13px;
+  font-weight: 600;
   text-align: center;
-  min-width: 60px;
+  transition: all 0.2s ease;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 40px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.tab:hover:not(.locked) {
+  background: linear-gradient(180deg, #2b2116 0%, #1c150e 100%);
+  color: var(--text-gold);
+  border-color: var(--border-gold);
+  transform: translateY(-1px);
 }
 
 .tab.active {
-  background: #2a2216;
-  color: var(--text-gold);
-  border-color: var(--border-gold);
+  background: linear-gradient(180deg, #3d2c16 0%, #24190b 100%);
+  color: var(--text-bright);
+  border-color: var(--border-gold-bright);
+  box-shadow: 0 0 12px rgba(212, 163, 71, 0.3), inset 0 1px 1px rgba(255, 230, 160, 0.3);
 }
 
 .tab.locked {
-  opacity: 0.4;
+  opacity: 0.45;
   cursor: not-allowed;
+  filter: grayscale(0.5);
 }
 
-/* ========== 面板 ========== */
+/* ========== 核心内容面板 ========== */
 .panel {
   background: var(--bg-panel);
   border: 1px solid var(--border-main);
-  border-radius: var(--radius-md);
-  padding: 10px;
-  margin-bottom: 6px;
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow-card);
+  position: relative;
 }
 
 .panel h3 {
+  font-family: var(--font-serif);
   color: var(--text-gold);
-  font-size: 14px;
+  font-size: 15px;
   letter-spacing: 2px;
-  margin-bottom: 6px;
+  margin: 0 0 10px;
   border-bottom: 1px solid var(--border-soft);
-  padding-bottom: 3px;
+  padding-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .panel h4 {
+  font-family: var(--font-serif);
   color: var(--text-gold2);
   font-size: 13px;
-  margin: 6px 0 3px;
+  margin: 10px 0 6px;
+  letter-spacing: 1px;
 }
 
 .panel h5 {
   font-size: 12px;
+  color: var(--text-dim);
+  margin: 6px 0;
 }
 
-/* ========== 时段标签 ========== */
+/* 时段标签 */
 .hour-label {
-  font-size: 12px;
-  padding: 1px 6px;
-  border-radius: 3px;
-  margin-left: 6px;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
 }
 
 .hour-label.h-morning {
-  background: #3a2e1a;
+  background: rgba(240, 207, 122, 0.15);
   color: var(--hour-morning);
+  border: 1px solid rgba(240, 207, 122, 0.35);
 }
 
 .hour-label.h-noon {
-  background: #3a2a1a;
+  background: rgba(230, 154, 56, 0.15);
   color: var(--hour-noon);
+  border: 1px solid rgba(230, 154, 56, 0.35);
 }
 
 .hour-label.h-night {
-  background: #1a2a3a;
+  background: rgba(109, 174, 230, 0.15);
   color: var(--hour-night);
+  border: 1px solid rgba(109, 174, 230, 0.35);
 }
 
-/* ========== 响应式 ========== */
-@media (max-width: 700px) {
-  .status-bar {
-    font-size: 11px;
-    padding: 5px 6px;
+/* 场景横幅插图 (宗门、洞府等) */
+.scene-header-card {
+  position: relative;
+  width: 100%;
+  height: 140px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 12px;
+  border: 1px solid var(--border-gold);
+  box-shadow: var(--shadow-card);
+}
+
+.scene-header-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.85);
+  transition: transform 3s ease;
+}
+
+.scene-header-card:hover img {
+  transform: scale(1.04);
+}
+
+.scene-header-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(14, 11, 8, 0.95) 100%);
+  display: flex;
+  align-items: flex-end;
+  padding: 10px 14px;
+}
+
+.scene-header-title {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-bright);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+  letter-spacing: 2px;
+}
+
+/* 调试控制折叠 */
+.debug-details {
+  margin-top: 14px;
+  background: rgba(14, 11, 8, 0.6);
+  border: 1px dashed #3d2a1b;
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+}
+
+.debug-details summary {
+  color: var(--text-dim);
+  font-size: 11px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.debug-details .debug-btn-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+/* 响应式调整 */
+@media (max-width: 640px) {
+  #app {
+    padding: 6px 8px 24px;
+  }
+  .top-hero-banner {
+    height: 105px;
+  }
+  .top-bar h1 {
+    font-size: 18px;
+    letter-spacing: 4px;
+  }
+  .status-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .status-avatar-circle {
+    width: 38px;
+    height: 38px;
+  }
+  .status-name-line .player-name {
+    font-size: 15px;
   }
   .tab {
     font-size: 12px;
-    padding: 7px 4px;
-    min-width: 56px;
-  }
-  .top-bar h1 {
-    font-size: 15px;
-    letter-spacing: 2px;
-  }
-  .icon-btn {
-    width: 36px;
-    height: 36px;
-    font-size: 16px;
+    padding: 8px 2px;
   }
 }

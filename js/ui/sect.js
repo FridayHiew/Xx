@@ -1,5 +1,5 @@
 /* ============================================================
-   ui/sect.js - 宗门面板 / 洞府面板
+   ui/sect.js - 宗门面板
    ============================================================ */
 
 function renderSect() {
@@ -7,23 +7,39 @@ function renderSect() {
   const sect = SECTS.find(s => s.id === S.sect);
   const rank = S.flags.rank || "杂务";
 
+
   const tabs = ["简介"];
   if (rank !== "杂务") tabs.push("宗门事务");
   if (RANKS.indexOf(rank) >= 2) {
     tabs.push("阵法");
     tabs.push("藏经阁");
   }
+  if (rank === "门外") tabs.push("门外战榜");                       /* ★ 新增 */
+  if (rank === "门内" || rank === "真传") tabs.push("门内战榜");    /* ★ 新增 */
   if (rank === "杂务" || rank === "门外") tabs.push("杂役铺");
+  if (RANKS.indexOf(rank) >= 2) {
+    tabs.push("坊市");    /* ★ 门内以上 */
+  }
   tabs.push("传功殿");
   tabs.push("丹方阁");
+  tabs.push("历练");
+  tabs.push("秘境");
   tabs.push("装备铺");
 
+  
   const uniqueTabs = [...new Set(tabs)];
 
-  let html = `<h3>${sect.name} <span class="tag ${sect.camp === "正道" ? "good" : sect.camp === "邪道" ? "bad" : "gold"}">${sect.camp}</span>
-    <span class="tag">Lv.${sect.level}</span>
-    <button class="help" onclick="showRankHelp()">?</button>
-  </h3>`;
+  let html = `
+    <div class="scene-header-card">
+      <img src="./src/assets/images/sect_mountain_gate_1792114544883.jpg" alt="${sect.name}仙家山门" referrerPolicy="no-referrer">
+      <div class="scene-header-overlay">
+        <div class="scene-header-title">🏯 ${sect.name} · ${sect.camp}名门 (Lv.${sect.level})</div>
+      </div>
+    </div>
+    <h3>${sect.name} <span class="tag ${sect.camp === "正道" ? "good" : sect.camp === "邪道" ? "bad" : "gold"}">${sect.camp}</span>
+      <span class="tag">Lv.${sect.level}</span>
+      <button class="help" onclick="showRankHelp()">?</button>
+    </h3>`;
 
   html += `<div class="subtabs">`;
   uniqueTabs.forEach(t => {
@@ -54,8 +70,23 @@ function renderSect() {
   else if (currentSectTab === "丹方阁") {
     html += renderRecipeShop();
   }
+  else if (currentSectTab === "历练") {
+    html += renderAdventureZoneList();
+  }
+  else if (currentSectTab === "秘境") {
+    html += renderSecretRealmList();
+  }
   else if (currentSectTab === "装备铺") {
     html += renderSectEquipShop(sect);
+  }
+  else if (currentSectTab === "门外战榜") {
+    html += renderRankBoard("menwai");
+  }
+  else if (currentSectTab === "门内战榜") {
+    html += renderRankBoard("mennei");
+  }
+  else if (currentSectTab === "坊市") {
+    html += renderMarket();
   }
   return html;
 }
@@ -175,7 +206,6 @@ function renderSectArts(sect) {
   let html = `<h5 style="color:#d8b878;margin:8px 0 4px;">心法</h5>`;
   html += `<p class="small">用贡献兑换心法"上卷"，可在背包中参悟。</p>`;
 
-  /* ===== 商店区 ===== */
   const allItems = getShopItems(SECT_ART_SHOP, S.sect);
   const available = filterShopByRealm(allItems, playerRealm);
 
@@ -211,7 +241,6 @@ function renderSectArts(sect) {
     html += `<p class="small">当前境界暂无可兑换心法。</p>`;
   }
 
-  /* ===== 残卷区：只显示已学心法的下一卷 ===== */
   html += `<h6 style="color:#d8b878;margin:14px 0 4px;">残卷兑换</h6>`;
   html += `<p class="small">残卷用于解锁更高等级上限。</p>`;
 
@@ -316,10 +345,6 @@ function renderSectSpells(sect) {
   return html;
 }
 
-/* ============================================================
-   召唤
-   ============================================================ */
-
 function renderSectSummons(sect) {
   const playerInfo = getPlayerRealmInfo();
   const playerRealm = playerInfo.realm;
@@ -360,7 +385,7 @@ function renderSectSummons(sect) {
 }
 
 /* ============================================================
-   藏经阁（按品级兑换丹药）
+   藏经阁
    ============================================================ */
 
 function renderLibrary() {
@@ -368,7 +393,6 @@ function renderLibrary() {
   html += `<p class="small">用贡献兑换丹药（按品级）。当前贡献：${S.contrib}</p>`;
   html += `<p class="small">贡献价 = 基础价 × 品级 × 2</p>`;
 
-  /* 核心丹药列表（baseId, 最大品级） */
   const exchangeList = [
     { baseId: "回血丹", maxGrade: 5 },
     { baseId: "回灵丹", maxGrade: 5 },
@@ -394,9 +418,7 @@ function renderLibrary() {
       const item = ITEMS[itemId];
       if (!item) continue;
 
-      /* 贡献价 = 基础价 × 品级 × 2 */
       const contribCost = Math.floor((item.price || 0) * 2);
-
       const owned = (S.inventory && S.inventory[itemId]) || 0;
       const canBuy = S.contrib >= contribCost;
 
@@ -417,7 +439,7 @@ function renderLibrary() {
 }
 
 /* ============================================================
-   丹方阁（按贡献兑换丹方）
+   丹方阁
    ============================================================ */
 
 function renderRecipeShop() {
@@ -429,13 +451,11 @@ function renderRecipeShop() {
     return html + `<p class="empty">丹方数据未加载。</p>`;
   }
 
-  /* 按价格分档展示 */
   const knownCount = RECIPES.filter(r => isRecipeKnown(r.id)).length;
   html += `<div class="card">
     <div class="row"><span>已解锁</span><b>${knownCount} / ${RECIPES.length}</b></div>
   </div>`;
 
-  /* 按价格排序 */
   const sorted = [...RECIPES].sort((a, b) => (a.price || 0) - (b.price || 0));
 
   sorted.forEach(recipe => {
@@ -467,7 +487,6 @@ function renderRecipeShop() {
   return html;
 }
 
-/* 购买丹方 */
 function buyRecipe(recipeId, price) {
   const recipe = getRecipe(recipeId);
   if (!recipe) return;
@@ -485,6 +504,89 @@ function buyRecipe(recipeId, price) {
     `消耗：${price} 贡献`,
     `可在【洞府 > 炼丹房】炼制`,
   ]);
+}
+
+/* ============================================================
+   历练（冒险地列表）
+   ============================================================ */
+
+function renderAdventureZoneList() {
+  if (typeof ADVENTURE_ZONES === "undefined") {
+    return `<p class="empty">冒险地数据未加载。</p>`;
+  }
+
+  const info = getPlayerRealmInfo();
+  const realm = info.realm;
+
+  let html = `<h4>历练 · 冒险地</h4>`;
+  html += `<p class="small">选择一处历练之所，深入其中可获得材料、灵石、修为。</p>`;
+
+  ADVENTURE_ZONES.forEach(zone => {
+    const canEnter = realm >= zone.realmMin && realm <= zone.realmMax;
+    const realmText = `${REALMS[zone.realmMin].name} ~ ${REALMS[zone.realmMax].name}`;
+
+    html += `<div class="card" style="${canEnter ? '' : 'opacity:.5;'}">
+      <div class="row">
+        <span>
+          <b>${zone.icon} ${zone.name}</b>
+        </span>
+        <span>
+          <span class="tag">${realmText}</span>
+        </span>
+      </div>
+      <div class="small">${zone.desc}</div>
+      <div class="small">层数：${zone.layers.length} 层　消耗 ${zone.actionCost} 行动</div>
+      ${canEnter
+        ? `<button class="block" onclick="enterAdventure('${zone.id}')">进入历练</button>`
+        : `<button class="block" disabled>境界不符</button>`}
+    </div>`;
+  });
+
+  return html;
+}
+
+/* ============================================================
+   秘境（列表）
+   ============================================================ */
+
+function renderSecretRealmList() {
+  let html = `<h4>秘境</h4>`;
+  html += `<p class="small">秘境为一次性奇遇，需消耗 2 行动进入。</p>`;
+
+  /* 待进入的 A 组秘境 */
+  const pending = S.flags.pendingSecretRealm;
+  if (pending) {
+    const ev = getSecretEventById(pending.id);
+    if (ev) {
+      html += `<div class="card">
+        <div class="row">
+          <span><b>${ev.name}</b> <span class="tag gold">待进入</span></span>
+          <span class="small">剩余 ${pending.expireDay - S.day} 天</span>
+        </div>
+        <div class="small">有效期：第 ${pending.appearDay} ~ ${pending.expireDay} 天</div>
+        <button class="block" onclick="enterSecretRealmById('${ev.id}', {fromPending:true})">进入探索</button>
+      </div>`;
+    }
+  }
+
+  /* B 组已解锁秘境 */
+  const unlockedB = (SECRET_EVENTS.B || []).filter(e => isSecretEventUnlocked(e.id));
+  if (unlockedB.length > 0) {
+    html += `<h5 style="color:var(--text-gold); margin:10px 0 4px;">已解锁秘境</h5>`;
+    unlockedB.forEach(ev => {
+      html += `<div class="card">
+        <b>${ev.name}</b> <span class="tag good">已解锁</span>
+        <div class="small">消耗 2 行动</div>
+        <button class="block" onclick="enterSecretRealmById('${ev.id}')">进入探索</button>
+      </div>`;
+    });
+  }
+
+  if (!pending && unlockedB.length === 0) {
+    html += `<p class="empty">暂无可进入的秘境。</p>`;
+  }
+
+  return html;
 }
 
 /* ============================================================
@@ -528,61 +630,73 @@ function renderSectEquipShop(sect) {
   return html;
 }
 
+function isShopItemOwned(id) {
+  return hasItem(id);
+}
+
+
 /* ============================================================
-   洞府
+   宗门坊市
    ============================================================ */
+/* ============================================================
+   宗门坊市
+   ============================================================ */
+function renderMarket() {
+  refreshAuctionStock();
 
-function renderCave() {
-  const c = S.cave;
-  const rank = S.flags.rank || "杂务";
-  if (RANKS.indexOf(rank) < 2) {
-    return `<h3>洞府</h3><p class="small">门内弟子才有资格拥有洞府。</p>`;
-  }
+  let html = `<h4>🏪 宗门坊市</h4>`;
+  html += `<p class="small">当前：${S.money} 铜钱 · ${S.stone} 灵石</p>`;
 
-  const caveTabs = getCaveTabs();
-
-  let html = `<h3>洞府 Lv.${c.level}　灵气 ${1 + c.spirit}/11</h3>`;
-
-  html += `<div class="subtabs">`;
-  caveTabs.forEach(t => {
-    const locked = t.locked;
-    html += `<div class="subtab ${currentCaveTab === t.id ? 'active' : ''} ${locked ? 'locked' : ''}"
-      ${locked ? 'title="未开放"' : `onclick="switchCaveTab('${t.id}')"`}>${t.name}${locked ? '🔒' : ''}</div>`;
+  /* 杂货铺 */
+  html += `<h5 style="color:var(--text-gold);margin-top:10px;">杂货铺</h5>`;
+  const goods = getMarketGoods();
+  goods.forEach(g => {
+    const item = ITEMS[g.itemId];
+    if (!item) return;
+    html += `<div class="row">
+      <span>${item.name} <span class="tag gold">${g.price} 铜钱</span></span>
+      <button class="small" onclick="buyMarketGood('${g.itemId}', ${g.price})" ${S.money < g.price ? "disabled" : ""}>购买</button>
+    </div>`;
   });
-  html += `</div>`;
 
-  if (currentCaveTab === "facility") {
-    const up = (key, name, cost) => {
-      const lvl = c[key];
-      const price = cost * (lvl + 1);
-      return `<div class="row"><span>${name} Lv.${lvl}</span>
-        <span><button onclick="upgradeCave('${key}',${price})" ${S.stone < price ? "disabled" : ""}>升级(${price})</button></span></div>`;
-    };
-    html += up("alchemy", "炼丹房", 50);
-    html += up("garden", "药园", 40);
-    html += up("spirit", "聚灵阵", 120);
-  }
-  else if (currentCaveTab === "alchemy") {
-    if (typeof renderCaveAlchemy === "function") {
-      html += renderCaveAlchemy();
-    } else {
-      html += `<p class="empty">炼丹房未加载。</p>`;
+  /* 拍卖行 */
+  html += `<h5 style="color:var(--text-gold);margin-top:10px;">拍卖行 · 今日特拍</h5>`;
+  html += `<p class="small">价格随机，每天刷新。</p>`;
+  S.flags.auction.stock.forEach((g, i) => {
+    const item = ITEMS[g.itemId];
+    if (!item) return;
+    const bought = S.flags.auction.bought[i];
+    html += `<div class="row">
+      <span>${item.name} <span class="tag gold">${g.price} 灵石</span></span>
+      ${bought
+        ? '<span class="tag good">已拍下</span>'
+        : `<button class="small" onclick="buyAuctionItem(${i})" ${S.stone < g.price ? "disabled" : ""}>拍下</button>`}
+    </div>`;
+  });
+
+  /* 卖东西 */
+  html += `<h5 style="color:var(--text-gold);margin-top:10px;">出售（半价）</h5>`;
+  const sellable = [];
+  for (const id in S.inventory) {
+    if (S.inventory[id] <= 0) continue;
+    const item = ITEMS[id];
+    if (!item) continue;
+    if (item.type === "pill" || item.type === "mat" || item.type === "equip") {
+      sellable.push({ id, item, count: S.inventory[id] });
     }
   }
-  else if (currentCaveTab === "pet") {
-    html += `<div class="row" style="margin-bottom:6px;">
-      <span class="small">兽粮不够？</span>
-      <button onclick="openBuyPetFood()">购买兽粮</button>
-    </div>`;
-    html += renderCavePet();
-  }
-  else {
-    html += `<p class="empty">未开放。</p>`;
+  if (sellable.length === 0) {
+    html += `<p class="empty">背包里没有可出售的东西。</p>`;
+  } else {
+    sellable.slice(0, 30).forEach(s => {
+      const price = Math.max(1, Math.floor((s.item.price || 10) / 2));
+      html += `<div class="row">
+        <span>${s.item.name} ×${s.count} <span class="tag">${price} 铜钱/个</span></span>
+        <button class="small" onclick="sellItemToMarket('${s.id}')">卖 1 个</button>
+      </div>`;
+    });
   }
 
   return html;
 }
 
-function isShopItemOwned(id) {
-  return hasItem(id);
-}

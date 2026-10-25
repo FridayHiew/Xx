@@ -25,29 +25,67 @@ function renderDay() {
     <div class="action-row">${renderActionButtons(rank, remain)}</div>
   </div>`;
 
+/* 宗门任务区 */
+if (S.flags.rank !== "杂务" && typeof getAvailableTasks === "function") {
+  const available = getAvailableTasks();
+  const active = S.flags.activeTasks || [];
+
+  html += `<div class="card" style="background:#1a140c;">
+    <b>📜 宗门任务</b>
+  `;
+
+  if (active.length > 0) {
+    active.forEach(t => {
+      const task = getTaskById(t.id);
+      if (!task) return;
+      const remainingDays = t.expireDay - S.day;
+      const isUrgent = remainingDays <= 1;
+      const color = isUrgent ? "var(--c-bad)" : "var(--c-good)";
+      html += `<div class="small" style="color:${color};">
+        【进行中】${task.name} - 剩余 ${remainingDays} 天
+      </div>`;
+    });
+  } else {
+    html += `<p class="small">可接取任务：</p>`;
+    available.slice(0, 3).forEach(task => {
+      html += `<div class="row">
+        <span>${task.name}</span>
+        <button class="small" onclick="acceptTask('${task.id}')">接取</button>
+      </div>`;
+    });
+  }
+  html += `</div>`;
+}
+
   if (S.hour === 2 && remain <= 0) {
-    html += `<button class="primary block" onclick="sleepToNextDay()">睡觉（进入下一天）</button>`;
+    html += `<button class="primary block" onclick="sleepToNextDay()">🌙 安歇入梦 · 进入下一天</button>`;
   } else if (S.hour === 2) {
-    html += `<button class="block" onclick="sleepToNextDay()">提前睡觉（放弃剩余行动）</button>`;
+    html += `<button class="block" onclick="sleepToNextDay()">🌙 提前安歇（放弃剩余行动）</button>`;
   }
 
-  html += `<div style="margin-top:8px;">
-    <button class="debug" onclick="debugComplete()">[DEBUG] 圆满当前心法</button>
-    <button class="debug" onclick="debugAddProficiency()">[DEBUG] 熟练度满</button>
-    <button class="debug" onclick="debugAddMoney()">[DEBUG] 铜钱 +1000</button>
-    <button class="debug" onclick="debugAddStone()">[DEBUG] 灵石 +1000</button>
-    <button class="debug" onclick="debugAddContrib()">[DEBUG] 贡献 +100</button>
-    <button class="debug" onclick="debugAddFragment()">[DEBUG] 随机残卷</button>
-    <button class="debug" onclick="toggleDebugRoot()">[DEBUG] 显示灵根</button>
-    <button class="debug" onclick="debugStartBattleMulti()">[DEBUG] 测试群战</button>
-    <button class="debug" onclick="debugStartBattle()">[DEBUG] 测试战斗</button>
-    <button class="debug" onclick="debugFullHeal()">[DEBUG] 气血灵力全满</button>
-    <button class="debug" onclick="debugRestoreHp()">[DEBUG] 气血全满</button>
-    <button class="debug" onclick="debugRestoreMp()">[DEBUG] 灵力全满</button>
-    <button class="debug" onclick="debugPromoteToMennei()">[DEBUG] 晋升门内</button>
-    <button class="debug" onclick="debugAddMaterial()">[DEBUG] 加材料</button>
-    <button class="debug" onclick="debugAddRecipe()">[DEBUG] 加丹方</button>
-    </div>`;
+  html += `
+    <details class="debug-details">
+      <summary>🛠️ 洞察玄机 (测试与调试秘术)</summary>
+      <div class="debug-btn-grid">
+        <button class="debug" onclick="debugComplete()">圆满当前心法</button>
+        <button class="debug" onclick="debugAddProficiency()">熟练度满</button>
+        <button class="debug" onclick="debugAddMoney()">铜钱 +1000</button>
+        <button class="debug" onclick="debugAddStone()">灵石 +1000</button>
+        <button class="debug" onclick="debugAddContrib()">贡献 +100</button>
+        <button class="debug" onclick="debugAddFragment()">随机残卷</button>
+        <button class="debug" onclick="toggleDebugRoot()">显示灵根</button>
+        <button class="debug" onclick="debugStartBattleMulti()">测试群战</button>
+        <button class="debug" onclick="debugStartBattle()">测试战斗</button>
+        <button class="debug" onclick="debugFullHeal()">气血灵力全满</button>
+        <button class="debug" onclick="debugRestoreHp()">气血全满</button>
+        <button class="debug" onclick="debugRestoreMp()">灵力全满</button>
+        <button class="debug" onclick="debugPromoteToMennei()">晋升门内</button>
+        <button class="debug" onclick="debugAddMaterial()">加材料</button>
+        <button class="debug" onclick="debugAddRecipe()">加丹方</button>
+        <button class="debug" onclick="debugResetGame()" style="background:#5a1a1a; border-color:#903030;">清空数据重置</button>
+      </div>
+    </details>
+  `;
 
   return html;
 }
@@ -63,19 +101,40 @@ function renderActionButtons(rank, remain) {
     }
   }
 
-  btns.push(`<button class="action-btn" onclick="doAction('partTime')" ${remain <= 0 ? "disabled" : ""}>打零工</button>`);
+  if (rank === "真传") {
+    btns.push(`<button class="action-btn" onclick="openSeclusion()" ${remain <= 0 ? "disabled" : ""}>闭关</button>`);
+  }
+
+  /* ★ 删除了打零工，改为 宗门任务/杂务选择 */
+  if (rank === "杂务") {
+    btns.push(`<button class="action-btn" onclick="openChoreSelector()" ${remain <= 0 ? "disabled" : ""}>打杂务 / 接任务</button>`);
+  } else if (RANKS.indexOf(rank) >= 1) {
+    btns.push(`<button class="action-btn" onclick="openTaskSelector()" ${remain <= 0 ? "disabled" : ""}>接取宗门任务</button>`);
+  }
+
   btns.push(`<button class="action-btn" onclick="gotoCultivate()">打坐修炼</button>`);
+
+  if (RANKS.indexOf(rank) >= 1) {
+    btns.push(`<button class="action-btn" onclick="doPatrol()" ${remain <= 0 ? "disabled" : ""}>宗门巡逻</button>`);
+  }
 
   if (RANKS.indexOf(rank) >= 2) {
     btns.push(`<button class="action-btn" onclick="doAction('explore')" ${remain <= 0 ? "disabled" : ""}>出门探索</button>`);
     btns.push(`<button class="action-btn" onclick="doAction('garden')" ${remain <= 0 ? "disabled" : ""}>打理药园</button>`);
     btns.push(`<button class="action-btn" onclick="doAction('practice')" ${remain <= 0 ? "disabled" : ""}>练习技能</button>`);
   }
+  
   if (rank !== "杂务") {
     btns.push(`<button class="action-btn" onclick="doDuel()" ${remain <= 0 ? "disabled" : ""}>对练基本功</button>`);
   }
+  
+  if (S.weekday === 0) {
+    btns.push(`<button class="action-btn" onclick="doListenLecture()" ${remain <= 0 ? "disabled" : ""}>传功堂听讲</button>`);
+  }
+
   return btns.join("");
 }
+
 
 function gotoCultivate() {
   currentTab = "cultivatePage";
@@ -155,6 +214,7 @@ function sleepToNextDay() {
 }
 
 /* 新一天 */
+
 function newDay() {
   if (S.dailyQuest && S.dailyQuest.done < S.dailyQuest.amount) {
     const missing = S.dailyQuest.amount - S.dailyQuest.done;
@@ -181,6 +241,32 @@ function newDay() {
   S.flags.npcDailyGift = {};
   S.flags.npcDailyDay = S.day;
 
+  /* ★ 辟谷丹天数递减 */
+  if (S.flags.fastingDays && S.flags.fastingDays > 0) {
+    S.flags.fastingDays--;
+    if (S.flags.fastingDays === 0) {
+      log("【辟谷】辟谷结束。", "c-normal");
+    }
+  }
+
+  /* ★ 隐息丹天数递减（30 天） */
+  if (S.flags.reduceEncounter && S.flags.reduceEncounter > 0) {
+    S.flags.reduceEncounterDays = (S.flags.reduceEncounterDays || 30) - 1;
+    if (S.flags.reduceEncounterDays <= 0) {
+      S.flags.reduceEncounter = 0;
+      S.flags.reduceEncounterDays = 0;
+      log("【隐息丹】效果结束。", "c-normal");
+    }
+  }
+
+  /* 榜单：重置每日挑战次数 */
+  S.flags.dailyChallenge = 0;
+
+  /* 榜单：每日被挑战 */
+  if (typeof processDailyRankChallenge === "function") {
+    processDailyRankChallenge();
+  }
+
   if (S.life >= S.lifeMax) { die("寿元耗尽，坐化于洞府之中。"); return; }
 
   /* 处理残留 DOT */
@@ -204,8 +290,24 @@ function newDay() {
   /* 丹药 buff 每日清理 */
   processDailyPillBuff();
 
+  /* 秘境：每月第 5 天检查 */
+  if (typeof checkMonthlySecretRealm === "function") {
+    checkMonthlySecretRealm();
+  }
+  if (typeof checkPendingSecretRealmExpire === "function") {
+    checkPendingSecretRealmExpire();
+  }
+  if (typeof checkExpiredTasks === "function") {
+    checkExpiredTasks();
+  }
+
   checkMonthlyPay();
   checkFestival();
+
+  /* 宗门小比（每月 15 号） */
+  if (typeof checkMonthlyCompetition === "function") {
+    checkMonthlyCompetition();
+  }
 
   if (S.day % 365 === 0) {
     log(`【新年】又是一年过去，你已 ${Math.floor(S.life)} 岁。`, "c-gold");
@@ -228,6 +330,7 @@ function newDay() {
   morningPrompt();
   render();
 }
+
 
 /* ============================================================
    每日清理丹药 buff
@@ -280,4 +383,84 @@ function checkSickness() {
     log("【生病】气血 -10。", "c-bad");
     if (S.hp <= 0) die("积劳成疾，病逝于床榻。");
   }
+}
+
+
+/* ============================================================
+   杂务/任务选择弹窗
+   ============================================================ */
+
+function openChoreSelector() {
+  if (S.actionsUsed >= ACTIONS_PER_SLOT) { log("行动已用完。", "c-bad"); return; }
+
+  const chores = [
+    { id: "chai", name: "砍柴", skill: "刀" },
+    { id: "tiao", name: "挑水", skill: "掌" },
+    { id: "cai",  name: "种菜", skill: "掌" },
+    { id: "ji",   name: "养鸡", skill: "兽" }
+  ];
+
+  const html = chores.map(c => `
+    <button class="block" onclick="startManualChore('${c.id}')">
+      ${c.name}（练${c.skill}）
+    </button>
+  `).join("");
+
+  showModal("选择杂务", `<p>你要做什么活？</p>${html}`, [
+    { label: "取消", fn: closeModal }
+  ]);
+}
+
+function startManualChore(choreId) {
+  closeModal();
+  const chore = CHORES_FAN.find(c => c.id === choreId);
+  if (!chore) return;
+
+  S.actionsUsed++;
+  const { inc, skillGains } = gainChoreSkill(chore, 1);
+
+  /* 给一点点铜钱作为打杂收入 */
+  const moneyGain = rndInt(2, 6);
+  S.money += moneyGain;
+
+  log(`你花了些时间【${chore.name}】。`, "c-normal");
+  const detail = [`熟练 +${inc}`, `铜钱 +${moneyGain}`];
+  skillGains.forEach(s => detail.push(`技能 ${s}`));
+
+  consumeAction(() => showActionModal("打杂结束", detail));
+}
+
+function openTaskSelector() {
+  if (S.flags.activeTasks && S.flags.activeTasks.length > 0) {
+    showModal("提示", `<p>你有未完成的任务，请先完成。</p>`, [{ label: "好", fn: closeModal }]);
+    return;
+  }
+  
+  const available = getAvailableTasks();
+  if (available.length === 0) {
+    showModal("提示", `<p>当前没有可接取的任务。</p>`, [{ label: "好", fn: closeModal }]);
+    return;
+  }
+
+  const html = available.map(t => `
+    <div class="card">
+      <b>${t.name}</b> <span class="tag">截止 ${t.deadline} 天</span>
+      <div class="small">${t.desc}</div>
+      <button class="block" onclick="closeModal(); acceptTask('${t.id}')">接取任务</button>
+    </div>
+  `).join("");
+
+  showModal("宗门任务", html, [{ label: "关闭", fn: closeModal }]);
+}
+
+
+function openSeclusion() {
+  showModal("闭关", `
+    <p>选择闭关天数（1~30）：</p>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+      ${[1, 3, 7, 15, 30].map(d =>
+        `<button onclick="closeModal(); startSeclusion(${d})">${d} 天</button>`
+      ).join("")}
+    </div>
+  `, [{ label: "取消", fn: closeModal }]);
 }

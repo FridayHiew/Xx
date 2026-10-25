@@ -6,13 +6,31 @@ function canPromoteTo(rank) {
   const req = RANK_REQ[rank];
   if (!req) return false;
   if (req.contrib && S.contrib < req.contrib) return false;
-  if (req.realm && getPlayerRealm() < req.realm) return false;
+
+  /*
+     ★ P2-1 已修：req.realm 是大境界，用 getPlayerRealmInfo().realm
+  */
+  if (req.realm && getPlayerRealmInfo().realm < req.realm) return false;
+
   if (req.subMin && getPlayerRealm() < req.subMin) return false;
   if (req.money && getCurrency() < req.money) return false;
   if (req.npcRole) {
     const npc = S.npcs.find(n => n.role === req.npcRole && n.alive);
     if (!npc || npc.aff < req.npcAff) return false;
   }
+
+  /* ★ 榜单排名限制 */
+  if (rank === "门内") {
+    if (typeof getPlayerRank === "function" && getPlayerRank("menwai") > 10) {
+      return false;
+    }
+  }
+  if (rank === "真传") {
+    if (typeof getPlayerRank === "function" && getPlayerRank("mennei") > 3) {
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -22,8 +40,11 @@ function sectTabLocked(tab) {
   if (tab === "宗门事务") return rankIdx < 1;
   if (tab === "阵法") return rankIdx < 2;
   if (tab === "藏经阁") return rankIdx < 2;
+  if (tab === "历练") return rankIdx < 1;
+  if (tab === "秘境") return rankIdx < 1;
   return false;
 }
+
 
 /* 杂役铺刷新 */
 function refreshShop() {
@@ -99,15 +120,15 @@ function givePromotionRewards(rank) {
 
   const detail = [];
 
-  /* 心法 → 给"上卷" */
-  if (rewards.art) {
-    addItem(rewards.art + "_f1", 1);
-    const art = HEART_ARTS.find(a => a.id === rewards.art);
-    if (art) {
-      log(`【晋升奖励】获得《${art.name}·上卷》。`, "c-gold");
-      detail.push(`获得：《${art.name}·上卷》`);
-    }
+  /* 根据宗门发上卷功法 */
+  const sectArt = HEART_ARTS.find(a => a.sect === S.sect);
+  if (sectArt) {
+    const fragId = sectArt.id + "_f1";
+    addItem(fragId, 1);
+    detail.push(`获得残卷：《${sectArt.name}·上卷》`);
+    log(`【晋升奖励】获得《${sectArt.name}·上卷》，可在背包参悟。`, "c-gold");
   }
+
 
   /* 武器 */
   if (rewards.weapon) {
@@ -153,6 +174,13 @@ function givePromotionRewards(rank) {
 
 
 /* ========== 尝试晋升 ========== */
+/*
+   ★ 修复（B6）：
+   原代码：req.money 在尝试前扣，req.contrib 在成功后扣，
+   但失败文案写"贡献/铜钱不退"，前后矛盾。
+   改为：req.contrib 也在尝试前扣，失败不退（与 money 一致）。
+   如果不想扣贡献，去改文案；这里我们选"尝试即扣"。
+*/
 function tryPromote() {
   const rank = S.flags.rank || "杂务";
   const nextRank = RANKS[RANKS.indexOf(rank) + 1];
@@ -163,13 +191,16 @@ function tryPromote() {
   const npc = S.npcs.find(n => n.role === req.npcRole && n.alive);
   const successRate = npc ? (0.5 + npc.aff * 0.01) : 0.5;
 
+  /* ★ 铜钱、贡献都在尝试前扣，失败不退 */
   if (req.money > 0) {
     if (!spendCurrency(req.money)) { log("钱不够。", "c-bad"); return; }
   }
+  if (req.contrib > 0) {
+    if (S.contrib < req.contrib) { log("贡献不足。", "c-bad"); return; }
+    S.contrib -= req.contrib;
+  }
 
   if (Math.random() < successRate) {
-    if (req.contrib) S.contrib -= req.contrib;
-
     if (nextRank === "门外") {
       const html = PEAKS.map(p => `
         <div class="card">
@@ -193,7 +224,7 @@ function tryPromote() {
       showActionModal("晋升成功", [`身份：${rank} → ${nextRank}`]);
     }
   } else {
-    log(`【晋升失败】${npc ? npc.name : "长老"}摇了摇头。贡献/铜钱不退。`, "c-bad");
+    log(`【晋升失败】${npc ? npc.name : "长老"}摇了摇头。铜钱/贡献不退。`, "c-bad");
     save(); render();
   }
 }
@@ -307,6 +338,6 @@ function buyShopEquip(id, price) {
   save(); render();
   showActionModal("购买成功", [
     `获得：${eq.name}`,
-    `可在【角色>装配】中装配`,
+    `可在【角色>背包>装备】中装配`,
   ]);
 }

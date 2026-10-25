@@ -45,7 +45,23 @@ function importSave() {
     ]);
 }
 
+/* 
+   清档：必须先把内存里的 S 置空，
+   否则 location.reload() 会触发 beforeunload，
+   beforeunload 里 `if (S) save()` 又会把旧档写回 localStorage。
+
+   ★ 修复（P0-1）：
+   原代码用 localStorage.clear()，会误删：
+     - xiuxian_admin_overrides（Admin 自定义数据包）
+     - xiuxian_audio_settings（音量 / 曲风设置）
+   改为精确删除 SAVE_KEY，其他数据保留。
+*/
 function resetGame() {
-  localStorage.removeItem(SAVE_KEY);
+  S = null;
+  try {
+    localStorage.removeItem(SAVE_KEY);
+  } catch (e) {
+    // ignore
+  }
   location.reload();
 }

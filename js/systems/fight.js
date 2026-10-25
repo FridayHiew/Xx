@@ -55,9 +55,12 @@ function pickRandomMaterials(count) {
    探索
    ============================================================ */
 
-function doExplore() {
-  /* 35% 概率遇敌 */
-  if (chance(0.35)) {
+  function doExplore() {
+  /* 遇敌概率：35%，隐息丹可减少 */
+  const reduceEncounter = S.flags.reduceEncounter || 0;
+  const finalChance = 0.35 * (1 - reduceEncounter);
+
+  if (chance(finalChance)) {
     const enemy = pick(FIGHT_ENEMIES.normal);
     startBattle([{ enemyId: enemy.id }]);
     return;

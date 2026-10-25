@@ -14,10 +14,14 @@ function getCaveTabs() {
   const alchemyUnlocked = (typeof isAlchemyUnlocked === "function")
     ? isAlchemyUnlocked()
     : ((S.cave && S.cave.alchemy) || 0) >= 1;
+  const forgeUnlocked = (typeof isForgeUnlocked === "function")
+    ? isForgeUnlocked()
+    : ((S.cave && S.cave.forge) || 0) >= 1;
 
   return [
     { id: "facility", name: "洞府设施", locked: false },
     { id: "alchemy",  name: "炼丹房",   locked: !alchemyUnlocked },
+    { id: "forge",    name: "炼器房",   locked: !forgeUnlocked },
     { id: summon.id,  name: summon.name, locked: summon.id !== "pet" },
   ];
 }
@@ -149,17 +153,26 @@ function openPetFeed(uid) {
   const pet = S.pets.list.find(p => p.uid === uid);
   if (!pet) return;
 
-  const allFoods = getAllItemsByType("food");
+  /* 背包里所有饲灵丸 */
+  const allFoods = [];
+  for (const id in S.inventory) {
+    if (S.inventory[id] <= 0) continue;
+    const item = ITEMS[id];
+    if (item && item.type === "pill" && item.effect && item.effect.type === "petFood") {
+      allFoods.push(item);
+    }
+  }
+
   const availableFoods = allFoods.map(f => {
     const have = S.inventory[f.id] || 0;
     const stored = (pet.foodStorage && pet.foodStorage[f.id]) || 0;
     return `<div class="row">
-      <span>${f.name}（+${f.hunger}）</span>
+      <span>${f.name}（饥饿 +5，修为 +${f.effect.exp || 0}）</span>
       <span>背包 ${have}　库存 ${stored}
         <button onclick="feedPet('${uid}', '${f.id}')" ${have <= 0 ? "disabled" : ""}>放入 1</button>
       </span>
     </div>`;
-  }).join("");
+  }).join("") || "<p class='empty'>背包里没有饲灵丸。</p>";
 
   showModal("喂食 " + pet.name, `
     <p>当前饥饿度：${Math.floor(pet.hunger || 0)}/100</p>
@@ -169,22 +182,29 @@ function openPetFeed(uid) {
 }
 
 /* ========== 买兽粮 ========== */
-
 function openBuyPetFood() {
   const cur = getCurrency();
-  const allFoods = getAllItemsByType("food");
-  const html = allFoods.map(f => {
+
+  /* 列出所有可买的饲灵丸（1~9 阶） */
+  const petFoods = [];
+  for (let t = 1; t <= 9; t++) {
+    const templateId = "饲灵丸_" + t + "阶";
+    const item = getOrCreatePillItem(templateId, 1);
+    if (item) petFoods.push(item);
+  }
+
+  const html = petFoods.map(f => {
     return `<div class="row">
-      <span>${f.name}（+${f.hunger}）</span>
+      <span>${f.name}（饥饿 +5，修为 +${f.effect.exp || 0}）</span>
       <span>
-        <button onclick="buyPetFood('${f.id}')" ${cur < f.price ? "disabled" : ""}>
-          ${f.price} ${currencyName()}
+        <button onclick="buyPetFood('${f.id}')" ${cur < (f.price || 10) ? "disabled" : ""}>
+          ${f.price || 10} ${currencyName()}
         </button>
       </span>
     </div>`;
   }).join("");
 
-  showModal("购买兽粮", `
+  showModal("购买饲灵丸", `
     <p>当前${currencyName()}：${cur}</p>
     <div class="card">${html}</div>
   `, [{ label: "关闭", fn: closeModal }]);
@@ -217,7 +237,14 @@ function renderCaveAlchemy() {
   else if (skillLv >= 6) skillBonus = 1;
   else if (skillLv >= 3) skillBonus = 0.5;
 
-  let html = `<h4>炼丹房 Lv.${caveLv}</h4>
+  let html = `
+    <div class="scene-header-card">
+      <img src="./src/assets/images/alchemy_pavilion_1792114547274.jpg" alt="紫府丹房" referrerPolicy="no-referrer">
+      <div class="scene-header-overlay">
+        <div class="scene-header-title">🔥 紫府丹房 · 炼化九转灵丹 (Lv.${caveLv})</div>
+      </div>
+    </div>
+    <h4>炼丹房 Lv.${caveLv}</h4>
     <div class="card">
       <div class="row"><span>炼丹房加成</span><b>+${caveBonus.toFixed(1)} 粒</b></div>
       <div class="row"><span>炼丹技能 Lv.${skillLv}</span><b>+${skillBonus.toFixed(1)} 粒</b></div>
@@ -268,6 +295,143 @@ function renderCaveAlchemy() {
       <div class="small">${recipe.desc || ""}</div>
     </div>`;
   });
+
+  return html;
+}
+
+
+/* ============================================================
+   炼器房 UI
+   ============================================================ */
+function renderCaveForge() {
+  if (typeof isForgeUnlocked !== "function") {
+    return `<p class="empty">炼器系统未加载。</p>`;
+  }
+
+  if (!isForgeUnlocked()) {
+    return `<p class="empty">炼器房尚未解锁，请先在洞府设施中升级。</p>`;
+  }
+
+  const caveLv = getForgeCaveLv();
+  const skillLv = getForgeSkillLv();
+  const moodEmoji = MOOD_EMOJI[S.mood + 2];
+  const moodName = MOOD_NAMES[S.mood + 2];
+
+  let html = `<h4>炼器房 Lv.${caveLv}</h4>
+    <div class="card">
+      <div class="row"><span>炼器房加成</span><b>+${((caveLv - 1) * 5).toFixed(0)}%</b></div>
+      <div class="row"><span>炼器技能 Lv.${skillLv}</span><b>${
+        skillLv >= 9 ? "+15%" : skillLv >= 6 ? "+10%" : skillLv >= 3 ? "+5%" : "无"
+      }</b></div>
+      <div class="row"><span>心情 ${moodName} ${moodEmoji}</span><b>${S.mood >= 1 ? "+3%" : S.mood <= -1 ? "-5%" : "无"}</b></div>
+    </div>`;
+
+  if (typeof FORGE_RECIPES === "undefined" || !FORGE_RECIPES) {
+    return html + `<p class="empty">炼器配方未加载。</p>`;
+  }
+
+  html += `<h4>炼器配方</h4>`;
+  html += `<p class="small">每炼一次消耗 1 行动。失败可能炸炉。</p>`;
+
+  FORGE_RECIPES.forEach(recipe => {
+    const rate = calcForgeRate(recipe);
+    const check = checkForgeMaterial(recipe);
+
+    const matLines = check.list.map(m => {
+      const color = m.ok ? "#7fbf5f" : "#d05a4a";
+      return `<span style="color:${color};">${m.baseId}_${m.grade} ×${m.need}（有 ${m.have}）</span>`;
+    }).join(" + ");
+
+    const stoneColor = check.stoneOk ? "#7fbf5f" : "#d05a4a";
+    const gradeNames = ["", "凡品", "下品", "中品", "上品", "极品", "灵品", "仙品"];
+
+    html += `<div class="card">
+      <div class="row">
+        <span>
+          <b>${recipe.name}</b>
+          <span class="tag gold">${gradeNames[recipe.grade] || recipe.grade + "品"}</span>
+        </span>
+        <span>${check.ok
+          ? `<button onclick="doForge('${recipe.id}')">炼制（${(rate * 100).toFixed(0)}%）</button>`
+          : `<span class="small" style="color:#d05a4a;">材料不足</span>`}</span>
+      </div>
+      <div class="small">${recipe.desc || ""}</div>
+      <div class="small">成功率：${(rate * 100).toFixed(1)}%</div>
+      <div class="small" style="margin-top:2px;">${matLines}</div>
+      <div class="small"><span style="color:${stoneColor};">灵石 ×${recipe.spiritStone}（有 ${S.stone}）</span></div>
+    </div>`;
+  });
+
+  return html;
+}
+
+
+/* ============================================================
+   洞府主渲染
+   ============================================================ */
+function renderCave() {
+  const c = S.cave || {};
+  const rank = S.flags.rank || "杂务";
+  if (RANKS.indexOf(rank) < 2) {
+    return `<h3>洞府</h3><p class="small">门内弟子才有资格拥有洞府。</p>`;
+  }
+
+  const caveTabs = getCaveTabs();
+
+  let html = `<h3>洞府 Lv.${c.level || 0}　灵气 ${1 + (c.spirit || 0)}/11</h3>`;
+
+  html += `<div class="subtabs">`;
+  caveTabs.forEach(t => {
+    const locked = t.locked;
+    html += `<div class="subtab ${currentCaveTab === t.id ? 'active' : ''} ${locked ? 'locked' : ''}"
+      ${locked ? 'title="未开放"' : `onclick="switchCaveTab('${t.id}')"`}>${t.name}${locked ? '🔒' : ''}</div>`;
+  });
+  html += `</div>`;
+
+  if (currentCaveTab === "facility") {
+    html += `
+      <div class="scene-header-card">
+        <img src="./src/assets/images/cave_cultivation_1792114544316.jpg" alt="洞天福地" referrerPolicy="no-referrer">
+        <div class="scene-header-overlay">
+          <div class="scene-header-title">🌌 洞天福地 · 聚灵吐纳 (Lv.${c.level || 0})</div>
+        </div>
+      </div>
+    `;
+    const up = (key, name, cost) => {
+      const lvl = c[key] || 0;
+      const price = cost * (lvl + 1);
+      return `<div class="row"><span>${name} Lv.${lvl}</span>
+        <span><button onclick="upgradeCave('${key}',${price})" ${S.stone < price ? "disabled" : ""}>升级(${price})</button></span></div>`;
+    };
+    html += up("alchemy", "炼丹房", 50);
+    html += up("forge",   "炼器房", 60);
+    html += up("garden",  "药园",   40);
+    html += up("spirit",  "聚灵阵", 120);
+  }
+  else if (currentCaveTab === "alchemy") {
+    if (typeof renderCaveAlchemy === "function") {
+      html += renderCaveAlchemy();
+    } else {
+      html += `<p class="empty">炼丹房未加载。</p>`;
+    }
+  }
+  else if (currentCaveTab === "forge") {
+    if (typeof renderCaveForge === "function") {
+      html += renderCaveForge();
+    } else {
+      html += `<p class="empty">炼器房未加载。</p>`;
+    }
+  }
+  else if (currentCaveTab === "pet") {
+    html += `<div class="row" style="margin-bottom:6px;">
+      <span class="small">兽粮不够？</span>
+      <button onclick="openBuyPetFood()">购买兽粮</button>
+    </div>`;
+    html += renderCavePet();
+  }
+  else {
+    html += `<p class="empty">未开放。</p>`;
+  }
 
   return html;
 }

@@ -1,0 +1,8 @@
+{
+  "name": "修仙人生",
+  "description": "文字修仙RPG角色扮演模拟器，开辟道途，修习心法法术，炼丹历练，探索宗门与机缘冒险。",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

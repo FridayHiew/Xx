@@ -37,11 +37,13 @@ function chooseBattlePreference() {
 }
 
 function doRandomSurvival(choice) {
-  /* 生率 */
+  const info = getPlayerRealmInfo();
+  const realm = info.realm;
+
   let baseRate = 0.5;
-  if (S.realm === 1) baseRate += 0.05;
-  else if (S.realm === 2) baseRate += 0.10;
-  else if (S.realm >= 3) baseRate += 0.15;
+  if (realm === 1) baseRate += 0.05;
+  else if (realm === 2) baseRate += 0.10;
+  else if (realm >= 3) baseRate += 0.15;
 
   if (choice === "cover") baseRate += 0.10;
   if (choice === "charge") baseRate -= 0.20;
@@ -51,7 +53,6 @@ function doRandomSurvival(choice) {
   baseRate = Math.max(0.2, Math.min(0.8, baseRate));
 
   if (Math.random() < baseRate) {
-    /* 生 */
     showModal("杀出重围", `
       <p>你杀出重围，回头望去——</p>
       <p>宗门已是一片火海。</p>
@@ -65,7 +66,6 @@ function doRandomSurvival(choice) {
       { label: "回凡间老家", fn: () => { closeModal(); showEnding("放弃回老家"); } },
     ]);
   } else {
-    /* 死 */
     if (choice === "cover") {
       showEnding("宗门英雄");
     } else {
@@ -75,7 +75,6 @@ function doRandomSurvival(choice) {
 }
 
 function returnToSave() {
-  /* 再次判定 */
   if (Math.random() < 0.5) {
     showEnding("宗门英雄");
   } else {
@@ -96,11 +95,14 @@ function showEnding(endingKey) {
   const ending = ENDING_TEXTS[endingKey];
   if (!ending) return;
 
-  const di = getDateInfo();
+  const info = getPlayerRealmInfo();
+  const realmName = info.realm === 0 ? "凡人" :
+    `${REALMS[info.realm].name}·${subName(info.lvl)}${info.lvl}重`;
+
   const summary = `
     <p>道号：${S.name}</p>
     <p>享年：${Math.floor(S.life)} 岁</p>
-    <p>境界：${S.realm === 0 ? "凡人" : `${REALMS[S.realm].name}·${subName(S.sub)}${S.sub}重`}</p>
+    <p>境界：${realmName}</p>
     <p>宗门：${S.sect ? SECTS.find(s => s.id === S.sect).name : "无"}</p>
   `;
 
@@ -115,11 +117,12 @@ function showEnding(endingKey) {
 }
 
 function exportEndingSave(endingKey) {
+  const info = getPlayerRealmInfo();
   const data = {
     version1Ending: endingKey,
     name: S.name,
-    realm: S.realm,
-    sub: S.sub,
+    realm: info.realm,
+    sub: info.lvl,
     root: S.roots,
     morality: S.morality,
     keyNPCs: S.npcs.filter(n => n.alive).map(n => ({ name: n.name, role: n.role, aff: n.aff })),

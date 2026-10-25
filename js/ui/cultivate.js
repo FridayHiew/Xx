@@ -76,7 +76,16 @@ function renderCultivatePage() {
     const isBP = isBreakPoint(prog.lvl);
     const curLevelData = art.levels.find(l => l.lvl === prog.lvl);
 
-    if (isBP) {
+    /* ★ 新增：判断是否已达残卷上限 */
+    const isMaxed = prog.lvl >= prog.maxLearn;
+
+    if (isMaxed) {
+      /* 已满级：不显示突破按钮，显示提示 */
+      primaryBtn += `<p class="small" style="color:#d05a4a; text-align:center; margin-top:10px;">
+        ⚠ 【${art.name}】已达当前残卷上限 Lv.${prog.maxLearn}。<br>
+        需在背包中使用中卷/下卷残卷解锁更高等级。
+      </p>`;
+    } else if (isBP) {
       /* 突破点：显示突破按钮 */
       let ready = false;
       if (prog.lvl === 0) ready = prog.proficiency >= 100;
@@ -89,22 +98,28 @@ function renderCultivatePage() {
       }
     } else {
       /* 非突破点：修为满直接升 */
-      if (prog.lvl < art.maxLvl && prog.lvl < prog.maxLearn
-          && curLevelData && prog.exp >= curLevelData.expNeed) {
+      if (prog.lvl < art.maxLvl && curLevelData && prog.exp >= curLevelData.expNeed) {
         primaryBtn += `<button class="primary block" onclick="tryBreak()">提升到 Lv.${prog.lvl + 1}</button>`;
       }
     }
   }
 
-  const stoneCount = S.inventory["灵石"] || 0;
+
+  /*
+     ★ 修复（P2-2）：
+     原代码 `S.inventory["灵石"]` 已不存在（main.js 迁移时合并到 S.stone 并删除），
+     导致 stoneCount 永远是 0，按钮永远 disabled。
+     改用 S.stone。
+  */
+  const stoneCount = S.stone || 0;
   return `
     <h3>打坐修炼</h3>
     ${header}
     ${primaryBtn}
     <button class="block" onclick="switchTab('day')">返回日常</button>
     <h4>使用灵石辅助修炼</h4>
-    <p class="small">需熟练度满 100，每次消耗 1 灵石。</p>
-    <p class="small">当前灵石：${stoneCount} 个</p>
+    <p class="small">需熟练度满 100，每次消耗 1 块灵石。</p>
+    <p class="small">当前灵石：${stoneCount} 块</p>
     <button class="block" onclick="cultivateWithStoneItem()" ${(isFan || stoneCount < 1) ? "disabled" : ""}>
       ${isFan ? "凡人阶段无法使用" : stoneCount < 1 ? "灵石不足" : "使用 1 灵石修炼"}
     </button>

@@ -1,5 +1,5 @@
 /* ============================================================
-   systems/pets.js - 灵宠系统
+   systems/pets.js - 灵宠系统（饲灵丸版）
    ============================================================ */
 
 /* ============================================================
@@ -21,6 +21,7 @@ function genPet(defId, name) {
     exp: 0,
     hp: null,
     hunger: 100,
+    loyalty: 50,      /* ★ 新增：忠诚度 */
     foodStorage: {},
   };
 }
@@ -46,7 +47,6 @@ function getPetStats(pet) {
   let def = Math.floor(base.def * scale);
   let speed = Math.floor((base.speed || 10) * (1 + (pet.lvl - 1) * 0.05));
 
-  /* 饥饿度修正 */
   const hunger = pet.hunger !== undefined ? pet.hunger : 100;
   let hungerMod = 0;
   if (hunger >= 80) hungerMod = 0;
@@ -57,7 +57,6 @@ function getPetStats(pet) {
   def = Math.max(0, Math.floor(def * (1 + hungerMod)));
   speed = Math.max(1, Math.floor(speed * (1 + hungerMod)));
 
-  /* 抗性 */
   const resistances = Object.assign({}, base.resistances || {});
   for (const k in bloodline.resistBonus) {
     resistances[k] = (resistances[k] || 0) + bloodline.resistBonus[k];
@@ -84,9 +83,10 @@ function getPetStats(pet) {
    ============================================================ */
 
 function buildPetUnit() {
-  const petUid = S.equipped.pet;
-  if (!petUid) return null;
+  if (!S.pets || !S.pets.list || S.pets.list.length === 0) return null;
+  if (!S.equipped.pet) return null;
 
+  const petUid = S.equipped.pet;
   const pet = S.pets.list.find(p => p.uid === petUid);
   if (!pet) return null;
 
@@ -145,7 +145,7 @@ function doSummon(caster, skillId) {
 
   const petUnit = buildPetUnit();
   if (!petUnit) {
-    logBattle("没有可出战的灵宠");
+    logBattle("没有可出战的灵宠（需先在洞府中出战一只灵宠）");
     return;
   }
 
@@ -173,7 +173,7 @@ function applyPendingPets() {
 }
 
 /* ============================================================
-   灵宠 AI（回合自动）
+   灵宠 AI
    ============================================================ */
 
 function petTurn(u) {
@@ -272,7 +272,6 @@ function canBreakPet(pet) {
     return { ok: false, reason: `天赋所限，最高${REALMS[talent.maxRealm].name}期` };
   }
 
-  /* petBreak 材料按 realm 找 */
   const petBreakId = "petBreak_" + (pet.realm + 1);
   const item = ITEMS[petBreakId];
   if (!item) return { ok: false, reason: "无法突破" };
@@ -330,7 +329,10 @@ function unequipPet() {
   save(); renderProfile();
 }
 
-/* 每天处理灵宠 */
+/* ============================================================
+   每日处理（饲灵丸自动喂食）
+   ============================================================ */
+
 function processDailyPets() {
   if (!S.pets || !S.pets.list) return [];
 
@@ -338,20 +340,37 @@ function processDailyPets() {
 
   S.pets.list.forEach(pet => {
     if (pet.hunger === undefined) pet.hunger = 100;
+    if (pet.loyalty === undefined) pet.loyalty = 50;
     if (!pet.foodStorage) pet.foodStorage = {};
 
     pet.hunger = Math.max(0, pet.hunger - rndInt(5, 20));
 
-    const foods = ["food_high", "food_mid", "food_low"];
-    for (const fid of foods) {
+    /* ★ 自动喂食：从 foodStorage 里找任意饲灵丸 */
+    for (const fid in pet.foodStorage) {
+      if (pet.foodStorage[fid] <= 0) continue;
+      const food = ITEMS[fid];
+      if (!food || food.type !== "pill") continue;
+      if (!food.effect || food.effect.type !== "petFood") continue;
+
       while (pet.hunger < 100 && (pet.foodStorage[fid] || 0) > 0) {
-        const food = ITEMS[fid];
-        if (!food) break;
         pet.foodStorage[fid]--;
         if (pet.foodStorage[fid] <= 0) delete pet.foodStorage[fid];
-        pet.hunger += food.hunger;
-        if (pet.hunger > 100) pet.hunger = 100;
+
+        /* 饥饿回复 +5 */
+        pet.hunger = Math.min(100, pet.hunger + (food.effect.hunger || 5));
+
+        /* 修为增加 */
+        if (food.effect.exp) {
+          pet.exp += food.effect.exp;
+          let need = petExpNeed(pet.lvl);
+          while (pet.exp >= need && pet.lvl < 10) {
+            pet.exp -= need;
+            pet.lvl++;
+            need = petExpNeed(pet.lvl);
+          }
+        }
       }
+      if (pet.hunger >= 100) break;
     }
 
     if (pet.hunger <= 0) {
@@ -369,15 +388,24 @@ function processDailyPets() {
   return deadPets;
 }
 
-/* 把 1 个兽粮放进灵宠存储 */
+/* ============================================================
+   喂食（饲灵丸）
+   ============================================================ */
+
 function feedPet(uid, foodId) {
   const pet = S.pets.list.find(p => p.uid === uid);
   if (!pet) return;
   const food = ITEMS[foodId];
-  if (!food || food.type !== "food") return;
+  if (!food) return;
+
+  /* 只接受饲灵丸（type pill + effect.type petFood） */
+  if (food.type !== "pill" || !food.effect || food.effect.type !== "petFood") {
+    log("只能喂食饲灵丸。", "c-bad");
+    return;
+  }
 
   const have = S.inventory[foodId] || 0;
-  if (have <= 0) { log("没有这种兽粮。", "c-bad"); return; }
+  if (have <= 0) { log("没有这种饲灵丸。", "c-bad"); return; }
 
   removeItem(foodId, 1);
 
@@ -398,11 +426,12 @@ function renamePet(uid, newName) {
   save(); render();
 }
 
-function buyPetFood(foodId) {
-  const food = ITEMS[foodId];
-  if (!food || food.type !== "food") return;
-  if (!spendCurrency(food.price)) { log("钱不够。", "c-bad"); return; }
-  addItem(foodId, 1);
+/* 买饲灵丸 */
+function buyPetFood(itemId) {
+  const food = ITEMS[itemId];
+  if (!food) return;
+  if (!spendCurrency(food.price || 10)) { log("钱不够。", "c-bad"); return; }
+  addItem(itemId, 1);
   log(`购买 ${food.name} ×1。`, "c-good");
   save(); render();
 }
